@@ -64,12 +64,6 @@ export default function RootLayout() {
             height: 100% !important;
             overflow-x: hidden !important;
           }
-          /* Single smooth scroll container for web */
-          .r-overflow-1udh08x, [data-testid="screen-container"] {
-            overflow-y: auto !important;
-            overflow-x: hidden !important;
-            -webkit-overflow-scrolling: touch !important;
-          }
           /* Custom sleek scrollbar */
           ::-webkit-scrollbar {
             width: 5px;

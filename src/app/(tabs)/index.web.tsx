@@ -100,12 +100,18 @@ export default function HomeWebScreen() {
 
   return (
     <div style={{
-      minHeight: '100%',
-      width: '100%',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      WebkitOverflowScrolling: 'touch',
       backgroundColor: '#080711',
       color: '#f8fafc',
       fontFamily: 'Manrope, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      paddingBottom: 120,
+      paddingBottom: 110,
       boxSizing: 'border-box',
     }}>
       {/* Background ambient radial glow */}
