@@ -23,12 +23,14 @@ export function Screen({
           paddingTop: padTop ? insets.top + space.md : space.md,
           paddingHorizontal: space.lg,
           paddingBottom: insets.bottom + 110,
-          gap: space.lg,
+          alignItems: 'center',
         }}
         refreshControl={onRefresh ? <RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} tintColor={c.accent} /> : undefined}
         showsVerticalScrollIndicator={false}
       >
-        {children}
+        <View style={{ width: '100%', maxWidth: 860, gap: space.lg }}>
+          {children}
+        </View>
       </ScrollView>
     </View>
   );
@@ -144,3 +146,15 @@ export function shadow(opacity: number, color: string): ViewStyle {
 export function tap() {
   if (Platform.OS !== 'web') Haptics.selectionAsync().catch(() => {});
 }
+
+/* ─── Метрика / Статистика ─── */
+export function Stat({ label, value, color }: { label: string; value: string; color?: string }) {
+  const { c } = useTheme();
+  return (
+    <View style={{ flex: 1, minWidth: 64, padding: 10, borderRadius: radius.md, backgroundColor: c.bgSecondary, gap: 2 }}>
+      <T v="muted" style={{ fontSize: 11 }}>{label}</T>
+      <Text style={{ fontFamily: fonts.bodyHeavy, fontSize: 14, color: color ?? c.textPrimary }}>{value}</Text>
+    </View>
+  );
+}
+

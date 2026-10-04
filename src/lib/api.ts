@@ -4,7 +4,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 /* ─── API-клиент к epats.io ─── */
 
-export const API_BASE = process.env.EXPO_PUBLIC_API_BASE ?? 'https://epats.vercel.app';
+export const API_BASE =
+  process.env.EXPO_PUBLIC_API_BASE ??
+  (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:3000'
+    : 'https://epats.vercel.app');
 export const WEB_BASE = API_BASE;
 const TOKEN_KEY = 'epats_session';
 
