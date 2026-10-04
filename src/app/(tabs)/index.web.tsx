@@ -100,11 +100,13 @@ export default function HomeWebScreen() {
 
   return (
     <div style={{
-      minHeight: '100vh',
+      minHeight: '100%',
+      width: '100%',
       backgroundColor: '#080711',
       color: '#f8fafc',
       fontFamily: 'Manrope, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      paddingBottom: 110,
+      paddingBottom: 120,
+      boxSizing: 'border-box',
     }}>
       {/* Background ambient radial glow */}
       <div style={{
@@ -457,7 +459,13 @@ export default function HomeWebScreen() {
             </div>
 
             {/* City Tabs */}
-            <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 10, marginBottom: 14 }}>
+            <div
+              className="no-scrollbar"
+              style={{
+                display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 6, marginBottom: 14,
+                scrollbarWidth: 'none', msOverflowStyle: 'none',
+              }}
+            >
               {CITY_OPTIONS.map(c => {
                 const active = selectedCity === c.id;
                 return (

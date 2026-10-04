@@ -6,6 +6,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Platform } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AuthProvider } from '@/lib/auth';
@@ -53,6 +54,48 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (loaded) SplashScreen.hideAsync();
+    if (Platform.OS === 'web' && typeof document !== 'undefined') {
+      const styleId = 'expo-web-scroll-fix';
+      if (!document.getElementById(styleId)) {
+        const style = document.createElement('style');
+        style.id = styleId;
+        style.innerHTML = `
+          html, body, #root {
+            height: 100% !important;
+            overflow-x: hidden !important;
+          }
+          /* Single smooth scroll container for web */
+          .r-overflow-1udh08x, [data-testid="screen-container"] {
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            -webkit-overflow-scrolling: touch !important;
+          }
+          /* Custom sleek scrollbar */
+          ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+          }
+          ::-webkit-scrollbar-track {
+            background: transparent;
+          }
+          ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 999px;
+          }
+          ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+          }
+          .no-scrollbar::-webkit-scrollbar {
+            display: none !important;
+          }
+          .no-scrollbar {
+            -ms-overflow-style: none !important;
+            scrollbar-width: none !important;
+          }
+        `;
+        document.head.appendChild(style);
+      }
+    }
   }, [loaded]);
 
   if (!loaded) return null;

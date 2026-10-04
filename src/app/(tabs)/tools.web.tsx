@@ -89,11 +89,13 @@ const TOOLS = [
 export default function ToolsWebScreen() {
   return (
     <div style={{
-      minHeight: '100vh',
+      minHeight: '100%',
+      width: '100%',
       backgroundColor: '#0c0714',
       color: '#f8fafc',
       fontFamily: 'Manrope, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      paddingBottom: 110,
+      paddingBottom: 120,
+      boxSizing: 'border-box',
     }}>
       {/* Background glow */}
       <div style={{

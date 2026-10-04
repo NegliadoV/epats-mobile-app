@@ -104,11 +104,13 @@ export default function MeWebScreen() {
 
   return (
     <div style={{
-      minHeight: '100vh',
+      minHeight: '100%',
+      width: '100%',
       backgroundColor: '#080711',
       color: '#f8fafc',
       fontFamily: 'Manrope, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      paddingBottom: 110,
+      paddingBottom: 120,
+      boxSizing: 'border-box',
     }}>
       {/* Background ambient radial glow */}
       <div style={{
