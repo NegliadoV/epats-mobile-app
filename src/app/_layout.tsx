@@ -37,6 +37,7 @@ function RootStack() {
         <Stack.Screen name="tools/checklist" options={{ title: 'Чеклист переезда' }} />
         <Stack.Screen name="tools/cities" options={{ title: 'Сравнение городов' }} />
         <Stack.Screen name="tools/telegram" options={{ title: 'Чаты экспатов' }} />
+        <Stack.Screen name="tools/visa" options={{ title: 'Визаран и калькулятор' }} />
       </Stack>
     </>
   );

@@ -18,7 +18,7 @@ export const TOOLS: ToolDef[] = [
   { href: '/tools/checklist', name: 'Чеклист переезда', emoji: '📋', desc: 'Пошаговый план подготовки', native: true },
   { href: '/tools/cities', name: 'Сравнение городов', emoji: '🏙️', desc: 'Дананг, Нячанг, Хошимин…', native: true },
   { href: '/tools/telegram', name: 'Чаты экспатов', emoji: '💬', desc: 'Проверенные Telegram-сообщества', native: true },
-  { href: '/tools/visa', name: 'Визаран', emoji: '🚌', desc: 'Сроки, маршруты и таймлайн', native: false },
+  { href: '/tools/visa', name: 'Визаран', emoji: '🚌', desc: 'Сроки, маршруты и таймлайн', native: true },
   { href: '/tools/weather', name: 'Погода & Радар', emoji: '🌦️', desc: 'Тайфуны, волны, воздух', native: false },
   { href: '/tools/neighborhoods', name: 'Карта жилья', emoji: '🏡', desc: 'Районы и цены аренды', native: false },
 ];
