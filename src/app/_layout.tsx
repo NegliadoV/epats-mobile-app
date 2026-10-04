@@ -32,6 +32,11 @@ function RootStack() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="article/[slug]" options={{ title: '' }} />
         <Stack.Screen name="tools/converter" options={{ title: 'Конвертер VND' }} />
+        <Stack.Screen name="tools/calculator" options={{ title: 'Калькулятор бюджета' }} />
+        <Stack.Screen name="tools/electricity" options={{ title: 'Счёт за свет' }} />
+        <Stack.Screen name="tools/checklist" options={{ title: 'Чеклист переезда' }} />
+        <Stack.Screen name="tools/cities" options={{ title: 'Сравнение городов' }} />
+        <Stack.Screen name="tools/telegram" options={{ title: 'Чаты экспатов' }} />
       </Stack>
     </>
   );
