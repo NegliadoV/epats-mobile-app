@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useLocalSearchParams, router } from 'expo-router';
+import BrandLogo from '@/components/BrandLogo';
 import { getArticleBySlug, ARTICLES, getCategoryBySlug } from '@shared/data/articles';
 
 function formatDate(dateStr: string) {
@@ -285,7 +286,10 @@ export default function ArticleWebScreen() {
 
         {/* Breadcrumb */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24, fontSize: 13, color: '#64748b' }}>
-          <span onClick={() => router.push('/' as any)} style={{ cursor: 'pointer', color: '#94a3b8' }}>epats.io</span>
+          <div onClick={() => router.push('/' as any)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer', color: '#fff', fontWeight: 800 }}>
+            <BrandLogo size={20} />
+            <span>epats.io</span>
+          </div>
           <span>→</span>
           <span onClick={() => router.push('/articles' as any)} style={{ cursor: 'pointer', color: '#94a3b8' }}>Статьи</span>
           <span>→</span>

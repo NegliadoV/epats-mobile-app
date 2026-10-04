@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { router } from 'expo-router';
 import { ARTICLES, getArticleBySlug } from '@shared/data/articles';
+import BrandLogo from '@/components/BrandLogo';
 
 const CITY_OPTIONS = [
   { id: 'danang', name: 'Дананг', emoji: '🏖️' },
@@ -152,8 +153,8 @@ export default function MeWebScreen() {
             onClick={() => router.push('/' as any)}
             style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
           >
-            <span style={{ fontSize: 24 }}>🌴</span>
-            <span style={{ fontSize: 20, fontWeight: 900, letterSpacing: '-0.5px' }}>
+            <BrandLogo size={34} />
+            <span style={{ fontSize: 18, fontWeight: 900, letterSpacing: '-0.5px' }}>
               epats<span style={{ color: '#ff6b4a' }}>.io</span>
             </span>
           </div>
@@ -184,7 +185,10 @@ export default function MeWebScreen() {
 
         {/* Breadcrumb */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 28, fontSize: 13, color: '#64748b' }}>
-          <span onClick={() => router.push('/' as any)} style={{ cursor: 'pointer', color: '#94a3b8' }}>epats.io</span>
+          <div onClick={() => router.push('/' as any)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer', color: '#fff', fontWeight: 800 }}>
+            <BrandLogo size={18} />
+            <span>epats.io</span>
+          </div>
           <span>→</span>
           <span style={{ color: '#ff6b4a', fontWeight: 700 }}>Личный кабинет</span>
         </div>

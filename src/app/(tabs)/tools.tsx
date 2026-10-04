@@ -2,6 +2,7 @@ import { ExternalLink } from 'lucide-react-native';
 import { Text, View } from 'react-native';
 
 import { Card, Screen, T } from '@/components/ui';
+import BrandLogo from '@/components/BrandLogo';
 import { openTool, TOOLS } from '@/lib/tools';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fonts, radius, space } from '@/theme/tokens';
@@ -10,6 +11,12 @@ export default function ToolsScreen() {
   const { c } = useTheme();
   return (
     <Screen>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+        <BrandLogo size={28} />
+        <Text style={{ fontFamily: fonts.display, fontSize: 18, color: c.textPrimary }}>
+          epats<Text style={{ color: c.coral }}>.io</Text>
+        </Text>
+      </View>
       <View style={{ gap: 6 }}>
         <T v="h1">Инструменты</T>
         <T v="body">Калькуляторы и справочники для жизни во Вьетнаме</T>

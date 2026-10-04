@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import BrandLogo from '@/components/BrandLogo';
 
 type VisaType = 'evisa90_single' | 'evisa90_multi' | '45' | 'phuquoc30';
 type CalcMode = 'entry' | 'exit';
@@ -653,7 +654,15 @@ export default function VisaRunUnifiedPage() {
 
   return (
     <div style={{
-      minHeight: '100vh',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      WebkitOverflowScrolling: 'touch',
+      boxSizing: 'border-box',
       backgroundColor: '#120b1e',
       backgroundImage: `
         radial-gradient(ellipse 70% 45% at 85% -10%, rgba(255,154,60,0.22) 0%, transparent 60%),
@@ -664,7 +673,6 @@ export default function VisaRunUnifiedPage() {
       backgroundAttachment: 'fixed',
       color: '#fbf4ff',
       fontFamily: `'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`,
-      overflowX: 'hidden',
     }}>
       <style>{`
         :root {
@@ -705,11 +713,12 @@ export default function VisaRunUnifiedPage() {
         }
       `}</style>
 
-      <main style={{ paddingTop: 30, minHeight: '100vh' }}>
+      <main style={{ paddingTop: 10, paddingBottom: 60 }}>
         <div style={{ maxWidth: 1040, margin: '0 auto', padding: '20px 20px 80px' }}>
           {/* Breadcrumbs */}
           <nav style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, fontSize: 13 }}>
-            <a href="/" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>epats.io</a>
+            <BrandLogo size={20} />
+            <a href="/" style={{ color: '#fff', fontWeight: 800, textDecoration: 'none' }}>epats.io</a>
             <span style={{ color: 'var(--text-muted)' }}>→</span>
             <a href="/tools" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>Инструменты</a>
             <span style={{ color: 'var(--text-muted)' }}>→</span>

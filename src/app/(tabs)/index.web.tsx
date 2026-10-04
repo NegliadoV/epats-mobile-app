@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { router } from 'expo-router';
 import { ARTICLES, CATEGORIES, getFeaturedArticles } from '@shared/data/articles';
 import { useRates, useWeather, useHistory } from '@/lib/data';
+import BrandLogo from '@/components/BrandLogo';
 
 const CITY_OPTIONS = [
   { id: 'danang', name: 'Дананг', emoji: '🏖️' },
@@ -137,8 +138,8 @@ export default function HomeWebScreen() {
             onClick={() => router.push('/' as any)}
             style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
           >
-            <span style={{ fontSize: 24 }}>🌴</span>
-            <span style={{ fontSize: 20, fontWeight: 900, letterSpacing: '-0.5px' }}>
+            <BrandLogo size={34} />
+            <span style={{ fontSize: 18, fontWeight: 900, letterSpacing: '-0.5px' }}>
               epats<span style={{ color: '#ff6b4a' }}>.io</span>
             </span>
           </div>
@@ -736,8 +737,8 @@ export default function HomeWebScreen() {
           display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16,
           color: '#64748b', fontSize: 13,
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 18 }}>🌴</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <BrandLogo size={24} />
             <strong style={{ color: '#fff' }}>epats.io</strong> · Журнал и сервисы для русскоязычных экспатов во Вьетнаме
           </div>
           <div>

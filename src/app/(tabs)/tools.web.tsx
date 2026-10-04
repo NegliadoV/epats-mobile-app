@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import { router } from 'expo-router';
+import BrandLogo from '@/components/BrandLogo';
 
 const TOOLS = [
   {
@@ -110,7 +111,61 @@ export default function ToolsWebScreen() {
         pointerEvents: 'none', zIndex: 0,
       }} />
 
+      {/* Top Header */}
+      <header style={{
+        position: 'sticky', top: 0, zIndex: 50,
+        backgroundColor: 'rgba(12, 7, 20, 0.85)',
+        backdropFilter: 'blur(20px)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+      }}>
+        <div style={{
+          maxWidth: 1060, margin: '0 auto', padding: '0 20px', height: 60,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        }}>
+          <div
+            onClick={() => router.push('/' as any)}
+            style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
+          >
+            <BrandLogo size={32} />
+            <span style={{ fontSize: 18, fontWeight: 900, letterSpacing: '-0.5px', color: '#fff' }}>
+              epats<span style={{ color: '#ff6b4a' }}>.io</span>
+            </span>
+          </div>
+
+          <nav style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <button
+              onClick={() => router.push('/' as any)}
+              style={{
+                background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
+                color: '#f8fafc', padding: '7px 16px', borderRadius: 999, fontSize: 13, fontWeight: 700, cursor: 'pointer',
+              }}
+            >
+              Главная
+            </button>
+            <button
+              onClick={() => router.push('/articles' as any)}
+              style={{
+                background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
+                color: '#f8fafc', padding: '7px 16px', borderRadius: 999, fontSize: 13, fontWeight: 700, cursor: 'pointer',
+              }}
+            >
+              📖 Статьи
+            </button>
+          </nav>
+        </div>
+      </header>
+
       <div style={{ maxWidth: 1060, margin: '0 auto', padding: '36px 20px', position: 'relative', zIndex: 1 }}>
+        {/* Breadcrumb */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 28, fontSize: 13, color: '#64748b' }}>
+          <div onClick={() => router.push('/' as any)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer', color: '#fff', fontWeight: 800 }}>
+            <BrandLogo size={18} />
+            <span>epats.io</span>
+          </div>
+          <span>→</span>
+          <span style={{ color: '#1fd1c1', fontWeight: 700 }}>Все инструменты</span>
+        </div>
+
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: 44 }}>
           <div style={{
@@ -130,7 +185,7 @@ export default function ToolsWebScreen() {
         </div>
 
         {/* Tools Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(310px, 1fr))', gap: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20 }}>
           {TOOLS.map(tool => (
             <div
               key={tool.href}

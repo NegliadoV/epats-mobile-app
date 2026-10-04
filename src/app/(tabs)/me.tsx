@@ -4,6 +4,7 @@ import { Heart, LogOut, Send, Star } from 'lucide-react-native';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 
 import { Card, GradientButton, Screen, T } from '@/components/ui';
+import BrandLogo from '@/components/BrandLogo';
 import { WEB_BASE } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { getArticleBySlug } from '@shared/data/articles';
@@ -21,6 +22,12 @@ export default function MeScreen() {
   if (!user) {
     return (
       <Screen>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          <BrandLogo size={28} />
+          <Text style={{ fontFamily: fonts.display, fontSize: 18, color: c.textPrimary }}>
+            epats<Text style={{ color: c.coral }}>.io</Text>
+          </Text>
+        </View>
         <View style={{ gap: 6 }}>
           <T v="h1">Мой Вьетнам</T>
           <T v="body">Войдите через Telegram — избранное, город и срок визы синхронизируются с сайтом epats.io</T>

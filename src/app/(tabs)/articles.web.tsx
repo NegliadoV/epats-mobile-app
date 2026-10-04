@@ -2,6 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { router } from 'expo-router';
 import { ARTICLES, CATEGORIES } from '@shared/data/articles';
+import BrandLogo from '@/components/BrandLogo';
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -61,8 +62,8 @@ export default function ArticlesWebScreen() {
             onClick={() => router.push('/' as any)}
             style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
           >
-            <span style={{ fontSize: 24 }}>🌴</span>
-            <span style={{ fontSize: 20, fontWeight: 900, letterSpacing: '-0.5px' }}>
+            <BrandLogo size={34} />
+            <span style={{ fontSize: 18, fontWeight: 900, letterSpacing: '-0.5px' }}>
               epats<span style={{ color: '#ff6b4a' }}>.io</span>
             </span>
           </div>
@@ -93,7 +94,10 @@ export default function ArticlesWebScreen() {
 
         {/* Breadcrumb */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 28, fontSize: 13, color: '#64748b' }}>
-          <span onClick={() => router.push('/' as any)} style={{ cursor: 'pointer', color: '#94a3b8' }}>epats.io</span>
+          <div onClick={() => router.push('/' as any)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer', color: '#fff', fontWeight: 800 }}>
+            <BrandLogo size={18} />
+            <span>epats.io</span>
+          </div>
           <span>→</span>
           <span style={{ color: '#1fd1c1', fontWeight: 700 }}>Статьи и база знаний</span>
         </div>

@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 
 import { Card, Chip, Screen, T } from '@/components/ui';
+import BrandLogo from '@/components/BrandLogo';
 import { ARTICLES, CATEGORIES } from '@shared/data/articles';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fonts, space } from '@/theme/tokens';
@@ -14,6 +15,12 @@ export default function ArticlesScreen() {
 
   return (
     <Screen>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+        <BrandLogo size={28} />
+        <Text style={{ fontFamily: fonts.display, fontSize: 18, color: c.textPrimary }}>
+          epats<Text style={{ color: c.coral }}>.io</Text>
+        </Text>
+      </View>
       <View style={{ gap: 6 }}>
         <T v="h1">Статьи и гайды</T>
         <T v="body">{ARTICLES.length} материалов — работают и без интернета</T>

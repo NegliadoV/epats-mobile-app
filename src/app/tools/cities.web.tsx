@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import { router } from 'expo-router';
+import BrandLogo from '@/components/BrandLogo';
 
 const CITIES = [
   {
@@ -68,11 +69,19 @@ const RATING_LABELS: Record<string, string> = {
 export default function CitiesWebScreen() {
   return (
     <div style={{
-      minHeight: '100vh',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      WebkitOverflowScrolling: 'touch',
       backgroundColor: '#0c0714',
       color: '#f8fafc',
       fontFamily: 'Manrope, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      paddingBottom: 80,
+      paddingBottom: 90,
+      boxSizing: 'border-box',
     }}>
       {/* Background glow */}
       <div style={{
@@ -95,8 +104,9 @@ export default function CitiesWebScreen() {
           >
             ← Назад
           </button>
-          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>
-            epats.io → <span style={{ color: '#1fd1c1' }}>Сравнение городов</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>
+            <BrandLogo size={20} />
+            <span style={{ color: '#fff', fontWeight: 800 }}>epats.io</span> → <span style={{ color: '#1fd1c1' }}>Сравнение городов</span>
           </div>
         </div>
 

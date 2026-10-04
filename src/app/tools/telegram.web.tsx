@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import { router } from 'expo-router';
+import BrandLogo from '@/components/BrandLogo';
 
 const CHATS = [
   {
@@ -51,11 +52,19 @@ const TYPE_COLORS: Record<string, string> = {
 export default function TelegramWebScreen() {
   return (
     <div style={{
-      minHeight: '100vh',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      WebkitOverflowScrolling: 'touch',
       backgroundColor: '#0c0714',
       color: '#f8fafc',
       fontFamily: 'Manrope, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      paddingBottom: 80,
+      paddingBottom: 90,
+      boxSizing: 'border-box',
     }}>
       {/* Background glow */}
       <div style={{
@@ -78,8 +87,9 @@ export default function TelegramWebScreen() {
           >
             ← Назад
           </button>
-          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>
-            epats.io → <span style={{ color: '#1fd1c1' }}>Чаты экспатов</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>
+            <BrandLogo size={20} />
+            <span style={{ color: '#fff', fontWeight: 800 }}>epats.io</span> → <span style={{ color: '#1fd1c1' }}>Чаты экспатов</span>
           </div>
         </div>
 
@@ -157,7 +167,7 @@ export default function TelegramWebScreen() {
                 <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.08)' }} />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 14 }}>
                 {section.groups.map(group => (
                   <a
                     key={group.name}

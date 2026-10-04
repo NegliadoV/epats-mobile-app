@@ -5,6 +5,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { Sparkline } from '@/components/Sparkline';
 import { Card, Chip, Screen, SectionTitle, T, tap } from '@/components/ui';
+import BrandLogo from '@/components/BrandLogo';
 import { ARTICLES } from '@shared/data/articles';
 import { useHistory, useRates, useWeather } from '@/lib/data';
 import { nf, timeAgo } from '@/lib/format';
@@ -43,9 +44,12 @@ export default function Home() {
     <Screen refreshing={rates.refreshing} onRefresh={refreshAll}>
       {/* Шапка */}
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Text style={{ fontFamily: fonts.display, fontSize: 22, color: c.textPrimary }}>
-          epats<Text style={{ color: c.coral }}>.io</Text>
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          <BrandLogo size={32} />
+          <Text style={{ fontFamily: fonts.display, fontSize: 20, color: c.textPrimary }}>
+            epats<Text style={{ color: c.coral }}>.io</Text>
+          </Text>
+        </View>
         <Pressable
           onPress={() => { tap(); toggle(); }}
           hitSlop={10}
