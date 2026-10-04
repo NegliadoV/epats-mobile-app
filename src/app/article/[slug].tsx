@@ -1,0 +1,48 @@
+import { Stack, useLocalSearchParams } from 'expo-router';
+import { Share2 } from 'lucide-react-native';
+import { Pressable, Share, Text, View } from 'react-native';
+
+import { Markdown } from '@/components/Markdown';
+import { Screen, T } from '@/components/ui';
+import { WEB_BASE } from '@/lib/api';
+import { getArticleBySlug } from '@shared/data/articles';
+import { useTheme } from '@/theme/ThemeProvider';
+import { fonts, space } from '@/theme/tokens';
+
+export default function ArticleScreen() {
+  const { slug } = useLocalSearchParams<{ slug: string }>();
+  const { c } = useTheme();
+  const a = getArticleBySlug(slug);
+
+  if (!a) {
+    return <Screen padTop={false}><T v="h2">Статья не найдена</T></Screen>;
+  }
+
+  const url = `${WEB_BASE}/article/${a.slug}`;
+
+  return (
+    <>
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <Pressable hitSlop={10} onPress={() => Share.share({ message: `${a.title}\n${url}`, url })}>
+              <Share2 size={20} color={c.textPrimary} />
+            </Pressable>
+          ),
+        }}
+      />
+      <Screen padTop={false}>
+        <View style={{ gap: space.sm }}>
+          <Text style={{ fontSize: 44 }}>{a.emoji}</Text>
+          <Text style={{ fontFamily: fonts.bodyBold, fontSize: 12, color: c.coral, textTransform: 'uppercase', letterSpacing: 0.6 }}>
+            {a.category} · {a.readTime} мин
+          </Text>
+          <T v="h1" style={{ fontSize: 24, lineHeight: 31 }}>{a.title}</T>
+          <T v="body" style={{ color: c.textMuted }}>{a.excerpt}</T>
+        </View>
+        <View style={{ height: 1, backgroundColor: c.border }} />
+        <Markdown source={a.content} />
+      </Screen>
+    </>
+  );
+}
