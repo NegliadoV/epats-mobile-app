@@ -478,6 +478,7 @@ export default function ConverterWebScreen() {
               return (
                 <div
                   key={pair.id}
+                  className="epats-card"
                   onClick={() => setSelectedPair(pair.id)}
                   style={{
                     padding: '16px 18px',
@@ -486,13 +487,12 @@ export default function ConverterWebScreen() {
                     border: '1.5px solid',
                     borderColor: isSelected ? '#1fd1c1' : 'rgba(255,255,255,0.07)',
                     cursor: 'pointer',
-                    transition: 'all 0.2s ease',
                     boxShadow: isSelected ? '0 0 20px rgba(31,209,193,0.18)' : 'none',
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ fontSize: 16 }}>{pair.flag}</span>
+                      <span className="icon-spring" style={{ fontSize: 16 }}>{pair.flag}</span>
                       <span style={{ fontWeight: 800, fontSize: 14, color: '#fff' }}>{pair.label}</span>
                     </div>
                   </div>
@@ -535,6 +535,7 @@ export default function ConverterWebScreen() {
               return (
                 <div
                   key={n.value}
+                  className="epats-card"
                   style={{
                     padding: '14px 16px', borderRadius: 14, background: 'rgba(255,255,255,0.03)',
                     border: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: 14,

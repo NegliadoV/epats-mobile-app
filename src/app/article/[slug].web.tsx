@@ -210,22 +210,35 @@ export default function ArticleWebScreen() {
   const category = getCategoryBySlug(article.categorySlug);
   const related = ARTICLES.filter(a => a.categorySlug === article.categorySlug && a.slug !== article.slug).slice(0, 3);
 
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    const maxScroll = el.scrollHeight - el.clientHeight;
+    if (maxScroll > 0) {
+      setScrollProgress((el.scrollTop / maxScroll) * 100);
+    }
+  };
+
   return (
-    <div style={{
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      overflowY: 'auto',
-      overflowX: 'hidden',
-      WebkitOverflowScrolling: 'touch',
-      backgroundColor: '#080711',
-      color: '#f8fafc',
-      fontFamily: 'Manrope, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      paddingBottom: 110,
-      boxSizing: 'border-box',
-    }}>
+    <div
+      onScroll={handleScroll}
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        WebkitOverflowScrolling: 'touch',
+        backgroundColor: '#080711',
+        color: '#f8fafc',
+        fontFamily: 'Manrope, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        paddingBottom: 110,
+        boxSizing: 'border-box',
+      }}
+    >
       {/* Background ambient radial glow */}
       <div style={{
         position: 'fixed', top: 0, left: 0, right: 0, height: '600px',
@@ -236,15 +249,27 @@ export default function ArticleWebScreen() {
       {/* Top Navbar */}
       <header style={{
         position: 'sticky', top: 0, zIndex: 50,
-        background: 'rgba(8, 7, 17, 0.82)',
+        background: 'rgba(8, 7, 17, 0.88)',
         backdropFilter: 'blur(20px)',
         borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
       }}>
+        {/* Glowing Scroll Progress Bar */}
+        <div style={{ position: 'absolute', bottom: -1, left: 0, right: 0, height: 2.5, background: 'rgba(255,255,255,0.06)' }}>
+          <div style={{
+            height: '100%',
+            width: `${scrollProgress}%`,
+            background: 'linear-gradient(90deg, #1fd1c1, #38bdf8, #ff6b4a)',
+            boxShadow: '0 0 10px rgba(31,209,193,0.7)',
+            transition: 'width 0.1s ease-out',
+          }} />
+        </div>
+
         <div style={{
           maxWidth: 900, margin: '0 auto', padding: '0 20px', height: 60,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
           <button
+            className="epats-btn"
             onClick={() => router.push('/articles' as any)}
             style={{
               background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
@@ -256,6 +281,7 @@ export default function ArticleWebScreen() {
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <button
+              className="epats-btn"
               onClick={toggleFavorite}
               style={{
                 background: favorited ? 'rgba(245,158,11,0.2)' : 'rgba(255,255,255,0.06)',
@@ -267,6 +293,7 @@ export default function ArticleWebScreen() {
               {favorited ? '★ В избранном' : '☆ В закладки'}
             </button>
             <button
+              className="epats-btn"
               onClick={copyShareLink}
               style={{
                 background: copied ? 'rgba(31,209,193,0.2)' : 'rgba(255,255,255,0.06)',

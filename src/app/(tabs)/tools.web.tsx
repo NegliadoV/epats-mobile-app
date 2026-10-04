@@ -189,6 +189,7 @@ export default function ToolsWebScreen() {
           {TOOLS.map(tool => (
             <div
               key={tool.href}
+              className="epats-card"
               onClick={() => router.push(tool.href as any)}
               style={{
                 borderRadius: 24,
@@ -202,7 +203,6 @@ export default function ToolsWebScreen() {
                 display: 'flex',
                 flexDirection: 'column',
                 boxShadow: '0 12px 30px rgba(0,0,0,0.3)',
-                transition: 'all 0.2s ease',
               }}
             >
               {tool.badge && (
@@ -215,7 +215,7 @@ export default function ToolsWebScreen() {
                   {tool.badge}
                 </span>
               )}
-              <div style={{ fontSize: 44, marginBottom: 14 }}>{tool.icon}</div>
+              <div className="icon-spring" style={{ fontSize: 44, marginBottom: 14 }}>{tool.icon}</div>
               <h2 style={{ fontSize: 18, fontWeight: 900, color: '#fff', margin: '0 0 10px', lineHeight: 1.3 }}>
                 {tool.title}
               </h2>

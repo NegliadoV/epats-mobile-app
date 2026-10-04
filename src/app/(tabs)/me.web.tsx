@@ -215,7 +215,7 @@ export default function MeWebScreen() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20, marginBottom: 36 }}>
 
           {/* Visa Ring Card */}
-          <div style={{
+          <div className="epats-card" style={{
             background: 'rgba(22, 17, 36, 0.75)',
             backdropFilter: 'blur(20px)',
             border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -253,6 +253,7 @@ export default function MeWebScreen() {
                 Въезд {new Date(entryDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })} · {totalVisaDays} дней
               </p>
               <button
+                className="epats-btn"
                 onClick={() => router.push('/tools/visa' as any)}
                 style={{
                   background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
@@ -265,7 +266,7 @@ export default function MeWebScreen() {
           </div>
 
           {/* Departure Card */}
-          <div style={{
+          <div className="epats-card" style={{
             background: 'rgba(22, 17, 36, 0.75)',
             backdropFilter: 'blur(20px)',
             border: '1px solid rgba(255, 255, 255, 0.08)',

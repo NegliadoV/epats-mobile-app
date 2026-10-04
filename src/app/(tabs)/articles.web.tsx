@@ -218,6 +218,7 @@ export default function ArticlesWebScreen() {
             {filteredArticles.map(article => (
               <div
                 key={article.slug}
+                className="epats-card"
                 onClick={() => router.push(`/article/${article.slug}` as any)}
                 style={{
                   borderRadius: 22,
@@ -228,11 +229,10 @@ export default function ArticlesWebScreen() {
                   cursor: 'pointer',
                   display: 'flex', flexDirection: 'column',
                   boxShadow: '0 12px 30px rgba(0,0,0,0.35)',
-                  transition: 'transform 0.15s ease, border-color 0.15s ease',
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                  <span style={{ fontSize: 24 }}>{article.emoji}</span>
+                  <span className="icon-spring" style={{ fontSize: 24 }}>{article.emoji}</span>
                   <span style={{
                     color: '#1fd1c1', fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em',
                   }}>

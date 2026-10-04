@@ -133,6 +133,7 @@ export default function CitiesWebScreen() {
           {CITIES.map((city, idx) => (
             <div
               key={city.id}
+              className="epats-card"
               style={{
                 borderRadius: 24,
                 background: 'rgba(25, 16, 38, 0.7)',
@@ -147,7 +148,7 @@ export default function CitiesWebScreen() {
                 padding: '24px 28px', borderBottom: '1px solid rgba(255,255,255,0.06)',
                 display: 'flex', alignItems: 'flex-start', gap: 20, flexWrap: 'wrap',
               }}>
-                <div style={{ fontSize: 48 }}>{city.flag}</div>
+                <div className="icon-spring" style={{ fontSize: 48 }}>{city.flag}</div>
                 <div style={{ flex: 1, minWidth: 220 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 6 }}>
                     <h2 style={{ fontSize: 22, fontWeight: 900, color: '#fff', margin: 0 }}>{city.name}</h2>

@@ -219,7 +219,7 @@ export default function HomeWebScreen() {
               borderRadius: 999, padding: '6px 16px', marginBottom: 20,
               fontSize: 12.5, color: '#1fd1c1', fontWeight: 800,
             }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#1fd1c1', boxShadow: '0 0 10px #1fd1c1' }} />
+              <span className="animate-neon-blink" style={{ width: 8, height: 8, borderRadius: '50%', background: '#1fd1c1', boxShadow: '0 0 10px #1fd1c1' }} />
               Вьетнам для своих · 2026
             </div>
 
@@ -254,6 +254,7 @@ export default function HomeWebScreen() {
 
             <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginBottom: 36 }}>
               <button
+                className="epats-btn"
                 onClick={() => router.push('/tools/visa' as any)}
                 style={{
                   background: 'linear-gradient(135deg, #ff6b4a, #ff9a3c)',
@@ -266,12 +267,12 @@ export default function HomeWebScreen() {
                   cursor: 'pointer',
                   display: 'flex', alignItems: 'center', gap: 8,
                   boxShadow: '0 8px 24px -6px rgba(255,107,74,0.5)',
-                  transition: 'all 0.2s ease',
                 }}
               >
                 🚌 Посчитать визаран
               </button>
               <button
+                className="epats-btn"
                 onClick={() => router.push('/tools' as any)}
                 style={{
                   background: 'rgba(255,255,255,0.06)',
@@ -284,7 +285,6 @@ export default function HomeWebScreen() {
                   cursor: 'pointer',
                   display: 'flex', alignItems: 'center', gap: 8,
                   backdropFilter: 'blur(10px)',
-                  transition: 'all 0.2s ease',
                 }}
               >
                 🛠️ Все инструменты
@@ -308,41 +308,46 @@ export default function HomeWebScreen() {
             </div>
           </div>
 
-          {/* Tropical Sea Retro Scene Card */}
+          {/* Tropical Sea Retro Scene Card with Fluid Animations */}
           <div style={{
             position: 'relative', width: '100%', aspectRatio: '1 / 1', maxWidth: 440, marginLeft: 'auto',
             borderRadius: 32, overflow: 'hidden',
             background: 'linear-gradient(180deg, #1f0b3b 0%, #52164a 38%, #e0485c 66%, #ffa138 100%)',
             boxShadow: '0 30px 70px -20px rgba(255,107,74,0.4), inset 0 0 0 1px rgba(255,255,255,0.15)',
           }}>
-            {/* Stars */}
+            {/* Twinkling Stars */}
             <svg viewBox="0 0 400 400" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} aria-hidden="true">
               {[[40, 40], [90, 70], [150, 30], [300, 50], [350, 90], [260, 20], [200, 80], [60, 120], [340, 140]].map(([x, y], i) => (
-                <circle key={i} cx={x} cy={y} r={i % 3 === 0 ? 1.6 : 1} fill="#fff" opacity={0.65} />
+                <circle key={i} cx={x} cy={y} r={i % 3 === 0 ? 1.8 : 1.2} fill="#fff" opacity={0.65}>
+                  <animate attributeName="opacity" values="0.2;1;0.2" dur={`${2.5 + (i % 3)}s`} repeatCount="indefinite" />
+                </circle>
               ))}
             </svg>
 
-            {/* Glowing Retro Sun */}
-            <div style={{
-              position: 'absolute', width: '56%', height: '56%', left: '22%', top: '20%',
-              borderRadius: '50%',
-              background: 'linear-gradient(180deg, #ffe066 0%, #ff5252 100%)',
-              boxShadow: '0 0 80px rgba(255,160,50,0.6)',
-            }} />
+            {/* Floating Glowing Retro Sun */}
+            <div
+              className="animate-sun-float"
+              style={{
+                position: 'absolute', width: '56%', height: '56%', left: '22%', top: '20%',
+                borderRadius: '50%',
+                background: 'linear-gradient(180deg, #ffe066 0%, #ff5252 100%)',
+                boxShadow: '0 0 90px rgba(255,160,50,0.65)',
+              }}
+            />
 
-            {/* Waves */}
-            <svg viewBox="0 0 800 160" preserveAspectRatio="none" style={{ position: 'absolute', left: 0, bottom: 0, width: '100%', height: '32%' }} aria-hidden="true">
+            {/* Drifting Waves */}
+            <svg viewBox="0 0 800 160" preserveAspectRatio="none" style={{ position: 'absolute', left: 0, bottom: 0, width: '200%', height: '32%' }} className="animate-wave-slow" aria-hidden="true">
               <path d="M0 40 Q100 15 200 40 T400 40 T600 40 T800 40 V160 H0z" fill="#1fd1c1" opacity="0.6" />
             </svg>
-            <svg viewBox="0 0 800 160" preserveAspectRatio="none" style={{ position: 'absolute', left: 0, bottom: 0, width: '100%', height: '24%' }} aria-hidden="true">
+            <svg viewBox="0 0 800 160" preserveAspectRatio="none" style={{ position: 'absolute', left: 0, bottom: 0, width: '200%', height: '24%' }} className="animate-wave" aria-hidden="true">
               <path d="M0 50 Q100 25 200 50 T400 50 T600 50 T800 50 V160 H0z" fill="#0fa89a" />
             </svg>
-            <svg viewBox="0 0 800 160" preserveAspectRatio="none" style={{ position: 'absolute', left: 0, bottom: 0, width: '100%', height: '16%' }} aria-hidden="true">
+            <svg viewBox="0 0 800 160" preserveAspectRatio="none" style={{ position: 'absolute', left: 0, bottom: 0, width: '200%', height: '16%' }} className="animate-wave-slow" aria-hidden="true">
               <path d="M0 60 Q100 35 200 60 T400 60 T600 60 T800 60 V160 H0z" fill="#082f3a" />
             </svg>
 
-            {/* Tropical Palm silhouettes */}
-            <svg viewBox="0 0 200 300" style={{ position: 'absolute', left: '-4%', bottom: '4%', width: '48%' }} aria-hidden="true">
+            {/* Swaying Tropical Palms */}
+            <svg viewBox="0 0 200 300" style={{ position: 'absolute', left: '-4%', bottom: '4%', width: '48%' }} className="animate-palm-sway" aria-hidden="true">
               <g fill="#130826">
                 <path d="M96 300c-6-70 0-140 22-196l8 3c-20 56-26 124-20 193z" />
                 <path d="M120 104c-26-34-70-42-112-28 38-2 70 8 90 30-36-10-70-2-98 22 38-12 76-10 106-2z" />
@@ -352,20 +357,28 @@ export default function HomeWebScreen() {
               </g>
             </svg>
 
-            {/* Stamp Badge */}
-            <div style={{
-              position: 'absolute', bottom: 16, left: 16, padding: '7px 12px', borderRadius: 10,
-              background: 'rgba(12, 7, 20, 0.65)', backdropFilter: 'blur(10px)', border: '1px dashed rgba(255,255,255,0.3)',
-              color: '#fff', fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase',
-            }}>
-              Đà Nẵng · 16°N 108°E
+            {/* Floating Interactive Badges */}
+            <div
+              className="animate-float-slow"
+              style={{
+                position: 'absolute', bottom: 18, left: 18, padding: '7px 14px', borderRadius: 12,
+                background: 'rgba(12, 7, 20, 0.75)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.2)',
+                color: '#fff', fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase',
+                boxShadow: '0 8px 20px rgba(0,0,0,0.4)',
+              }}
+            >
+              📍 Đà Nẵng · 16°N
             </div>
 
-            <div style={{
-              position: 'absolute', top: 16, right: 16, padding: '6px 12px', borderRadius: 999,
-              background: 'rgba(31,209,193,0.2)', backdropFilter: 'blur(10px)', border: '1px solid rgba(31,209,193,0.4)',
-              color: '#1fd1c1', fontSize: 11, fontWeight: 800,
-            }}>
+            <div
+              className="animate-float-slow-rev"
+              style={{
+                position: 'absolute', top: 18, right: 18, padding: '7px 14px', borderRadius: 999,
+                background: 'rgba(31,209,193,0.22)', backdropFilter: 'blur(12px)', border: '1px solid rgba(31,209,193,0.5)',
+                color: '#1fd1c1', fontSize: 11.5, fontWeight: 800,
+                boxShadow: '0 8px 20px rgba(31,209,193,0.25)',
+              }}
+            >
               🌊 Тёплое море 30°C
             </div>
           </div>
@@ -375,7 +388,7 @@ export default function HomeWebScreen() {
         <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20, marginBottom: 56 }}>
 
           {/* Currency Bento Card */}
-          <div style={{
+          <div className="epats-card" style={{
             background: 'rgba(22, 17, 36, 0.75)',
             backdropFilter: 'blur(20px)',
             border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -386,10 +399,11 @@ export default function HomeWebScreen() {
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 20 }}>💹</span>
+                <span className="icon-spring" style={{ fontSize: 20 }}>💹</span>
                 <h3 style={{ fontSize: 17, fontWeight: 900, color: '#fff', margin: 0 }}>Курсы валют</h3>
               </div>
-              <span style={{ fontSize: 12, color: '#1fd1c1', background: 'rgba(31,209,193,0.12)', padding: '3px 9px', borderRadius: 999, fontWeight: 700 }}>
+              <span style={{ fontSize: 12, color: '#1fd1c1', background: 'rgba(31,209,193,0.12)', padding: '3px 10px', borderRadius: 999, fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <span className="animate-neon-blink" style={{ width: 6, height: 6, borderRadius: '50%', background: '#1fd1c1', display: 'inline-block' }} />
                 Live
               </span>
             </div>
@@ -586,6 +600,7 @@ export default function HomeWebScreen() {
             {TOOLS.map((tool, idx) => (
               <div
                 key={tool.href}
+                className="epats-card"
                 onClick={() => router.push(tool.href as any)}
                 style={{
                   borderRadius: 20,
@@ -597,7 +612,6 @@ export default function HomeWebScreen() {
                   position: 'relative',
                   display: 'flex', flexDirection: 'column',
                   boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
-                  transition: 'transform 0.15s ease, border-color 0.15s ease',
                 }}
               >
                 {tool.badge && (
@@ -610,7 +624,7 @@ export default function HomeWebScreen() {
                     {tool.badge}
                   </span>
                 )}
-                <div style={{ fontSize: 36, marginBottom: 12 }}>{tool.icon}</div>
+                <div className="icon-spring" style={{ fontSize: 36, marginBottom: 12 }}>{tool.icon}</div>
                 <h3 style={{ fontSize: 16.5, fontWeight: 800, color: '#fff', margin: '0 0 8px', lineHeight: 1.3 }}>
                   {tool.title}
                 </h3>

@@ -194,6 +194,7 @@ export default function NeighborhoodsWebScreen() {
           {filteredList.map(n => (
             <div
               key={n.id}
+              className="epats-card"
               style={{
                 borderRadius: 20,
                 background: 'rgba(25, 16, 38, 0.7)',

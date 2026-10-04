@@ -303,7 +303,7 @@ export default function ChecklistWebScreen() {
             </span>
           </div>
           <div style={{ height: 8, borderRadius: 99, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: `${progressPct}%`, background: 'linear-gradient(90deg, #1fd1c1, #38bdf8)', borderRadius: 99, transition: 'width 0.3s ease' }} />
+            <div style={{ height: '100%', width: `${progressPct}%`, background: 'linear-gradient(90deg, #1fd1c1, #38bdf8)', borderRadius: 99, transition: 'width 0.5s cubic-bezier(0.2, 0.8, 0.2, 1)' }} />
           </div>
 
           {/* Filter Chips */}

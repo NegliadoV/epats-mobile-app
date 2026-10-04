@@ -86,6 +86,105 @@ export default function RootLayout() {
             -ms-overflow-style: none !important;
             scrollbar-width: none !important;
           }
+
+          /* ─── Epats Rich Animation Engine ─── */
+          @keyframes sunFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+          }
+          @keyframes waveDrift {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+          }
+          @keyframes palmSway {
+            0%, 100% { transform: rotate(-2deg); }
+            50% { transform: rotate(2deg); }
+          }
+          @keyframes neonBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+          }
+          @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(31, 209, 193, 0.2); }
+            50% { box-shadow: 0 0 32px rgba(31, 209, 193, 0.55); }
+          }
+          @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-6px) rotate(1deg); }
+          }
+          @keyframes floatSlowRev {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-7px) rotate(-1.5deg); }
+          }
+          @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+          }
+          @keyframes radarSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+          @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+          }
+          @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+
+          /* Classes */
+          .animate-sun-float { animation: sunFloat 7s ease-in-out infinite; }
+          .animate-wave { animation: waveDrift 16s linear infinite; will-change: transform; }
+          .animate-wave-slow { animation: waveDrift 24s linear infinite reverse; will-change: transform; }
+          .animate-palm-sway { transform-origin: 50% 100%; animation: palmSway 5s ease-in-out infinite; will-change: transform; }
+          .animate-neon-blink { animation: neonBlink 2.2s ease-in-out infinite; }
+          .animate-float-slow { animation: floatSlow 5s ease-in-out infinite; }
+          .animate-float-slow-rev { animation: floatSlowRev 6s ease-in-out infinite; }
+          .animate-pulse-glow { animation: pulseGlow 3s ease-in-out infinite; }
+          .animate-fade-in-up { animation: fadeInUp 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+          .animate-radar-spin { animation: radarSpin 4s linear infinite; transform-origin: center center; }
+
+          /* Interactive Cards */
+          .epats-card {
+            transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease, border-color 0.25s ease, background-color 0.25s ease;
+          }
+          .epats-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(31, 209, 193, 0.35) !important;
+            box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.6), 0 0 24px rgba(31, 209, 193, 0.16) !important;
+          }
+          .epats-card:active {
+            transform: translateY(-1px) scale(0.99);
+          }
+
+          /* Interactive Buttons */
+          .epats-btn {
+            transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease, filter 0.2s ease;
+          }
+          .epats-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.12);
+          }
+          .epats-btn:active {
+            transform: translateY(0px) scale(0.97);
+          }
+
+          /* Icon spring on card hover */
+          .icon-spring {
+            display: inline-block;
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+          }
+          .epats-card:hover .icon-spring {
+            transform: scale(1.18) rotate(-7deg);
+          }
+
+          /* Shimmer */
+          .shimmer-bg {
+            background-size: 200% 200%;
+            animation: gradientShift 6s ease infinite;
+          }
         `;
         document.head.appendChild(style);
       }

@@ -389,7 +389,7 @@ export default function CalculatorWebScreen() {
                     </div>
                   </div>
                   <div style={{ height: 6, borderRadius: 99, background: 'rgba(255,255,255,0.06)', overflow: 'hidden', marginTop: 8 }}>
-                    <div style={{ height: '100%', width: pct + '%', background: 'linear-gradient(90deg, #1fd1c1, #38bdf8)', borderRadius: 99 }} />
+                    <div style={{ height: '100%', width: pct + '%', background: 'linear-gradient(90deg, #1fd1c1, #38bdf8)', borderRadius: 99, transition: 'width 0.5s cubic-bezier(0.2, 0.8, 0.2, 1)' }} />
                   </div>
                 </div>
               );
@@ -397,10 +397,11 @@ export default function CalculatorWebScreen() {
           </div>
 
           {/* Total Budget Card */}
-          <div style={{
+          <div className="shimmer-bg epats-card" style={{
             marginTop: 24, padding: '24px', borderRadius: 18,
-            background: 'linear-gradient(135deg, rgba(31,209,193,0.14) 0%, rgba(6,78,59,0.25) 100%)',
-            border: '1.5px solid rgba(31,209,193,0.4)',
+            background: 'linear-gradient(135deg, rgba(31,209,193,0.18) 0%, rgba(59,130,246,0.15) 50%, rgba(6,78,59,0.25) 100%)',
+            border: '1.5px solid rgba(31,209,193,0.45)',
+            boxShadow: '0 0 28px rgba(31,209,193,0.18)',
           }}>
             <div style={{ fontSize: 12, fontWeight: 800, color: '#1fd1c1', textTransform: 'uppercase', letterSpacing: 0.8 }}>
               💰 Итоговый бюджет в месяц (вилка)

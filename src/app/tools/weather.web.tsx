@@ -630,7 +630,22 @@ export default function WeatherWebScreen() {
                   <stop offset="50%" stopColor="#f59e0b" stopOpacity="0.4" />
                   <stop offset="100%" stopColor="transparent" stopOpacity="0" />
                 </radialGradient>
+                <linearGradient id="radarSweepGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="transparent" />
+                  <stop offset="100%" stopColor="#1fd1c1" stopOpacity="0.35" />
+                </linearGradient>
               </defs>
+
+              {/* Concentric Radar Grid Rings */}
+              <circle cx="260" cy="200" r="70" fill="none" stroke="rgba(31,209,193,0.1)" strokeDasharray="3,3" />
+              <circle cx="260" cy="200" r="130" fill="none" stroke="rgba(31,209,193,0.1)" strokeDasharray="4,4" />
+              <circle cx="260" cy="200" r="190" fill="none" stroke="rgba(31,209,193,0.08)" strokeDasharray="4,4" />
+
+              {/* Rotating Radar Sweep Beam */}
+              <g className="animate-radar-spin" style={{ transformOrigin: '260px 200px' }}>
+                <line x1="260" y1="200" x2="260" y2="0" stroke="rgba(31,209,193,0.5)" strokeWidth="1.5" />
+                <path d="M 260 200 L 260 0 A 200 200 0 0 1 360 27 Z" fill="url(#radarSweepGrad)" />
+              </g>
 
               <text x="320" y="32" fill="rgba(255,255,255,0.22)" fontSize="11" fontWeight="700" letterSpacing="2">
                 BIỂN ĐÔNG / SOUTH CHINA SEA
@@ -707,6 +722,12 @@ export default function WeatherWebScreen() {
                 const isSelected = selectedCity === cityKey;
                 return (
                   <g key={cityKey} onClick={() => setSelectedCity(cityKey)} style={{ cursor: 'pointer' }}>
+                    {isSelected && (
+                      <circle cx={pt.x} cy={pt.y} r="12" fill="none" stroke="#1fd1c1" strokeWidth="1.5" opacity="0.7">
+                        <animate attributeName="r" values="6;16;6" dur="2s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="0.8;0.1;0.8" dur="2s" repeatCount="indefinite" />
+                      </circle>
+                    )}
                     <circle
                       cx={pt.x} cy={pt.y}
                       r={isSelected ? 7 : 5}

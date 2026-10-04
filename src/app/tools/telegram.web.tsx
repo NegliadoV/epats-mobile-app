@@ -112,9 +112,9 @@ export default function TelegramWebScreen() {
         </div>
 
         {/* Telegram WebApp Mini App Showcase */}
-        <div style={{
+        <div className="shimmer-bg" style={{
           padding: '28px', borderRadius: 20, marginBottom: 24,
-          background: 'linear-gradient(135deg, rgba(31,209,193,0.14) 0%, rgba(59,130,246,0.14) 100%)',
+          background: 'linear-gradient(135deg, rgba(31,209,193,0.14) 0%, rgba(59,130,246,0.18) 50%, rgba(147,51,234,0.14) 100%)',
           border: '1.5px solid rgba(31,209,193,0.4)',
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
@@ -136,6 +136,7 @@ export default function TelegramWebScreen() {
             </div>
             <a
               href="https://t.me/epatsiobot" target="_blank" rel="noopener noreferrer"
+              className="epats-btn"
               style={{
                 padding: '12px 22px', borderRadius: 12,
                 background: '#1fd1c1', color: '#04201d',
@@ -162,7 +163,7 @@ export default function TelegramWebScreen() {
           {CHATS.map(section => (
             <div key={section.city}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                <span style={{ fontSize: 26 }}>{section.emoji}</span>
+                <span className="icon-spring" style={{ fontSize: 26 }}>{section.emoji}</span>
                 <h2 style={{ fontSize: 20, fontWeight: 900, color: '#fff', margin: 0 }}>{section.city}</h2>
                 <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.08)' }} />
               </div>
@@ -174,12 +175,12 @@ export default function TelegramWebScreen() {
                     href={group.link}
                     target="_blank"
                     rel="noopener noreferrer"
+                    className="epats-card"
                     style={{
                       padding: '18px 20px', borderRadius: 16,
                       background: 'rgba(25, 16, 38, 0.7)', backdropFilter: 'blur(20px)',
                       border: '1px solid rgba(255,255,255,0.08)', textDecoration: 'none',
                       display: 'flex', flexDirection: 'column', gap: 10,
-                      transition: 'all 0.2s ease',
                     }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>

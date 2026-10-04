@@ -213,7 +213,7 @@ export default function ElectricityWebScreen() {
           </div>
 
           {/* Card 2: Overpayment Comparison */}
-          <div style={{
+          <div className="epats-card" style={{
             padding: 28, borderRadius: 24,
             background: 'rgba(25, 16, 38, 0.7)', backdropFilter: 'blur(20px)',
             border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: 20,
@@ -247,11 +247,14 @@ export default function ElectricityWebScreen() {
             </div>
 
             {/* Overpay alert box */}
-            <div style={{
-              padding: '18px', borderRadius: 16,
-              background: overpayVnd > 0 ? 'rgba(239,68,68,0.12)' : 'rgba(31,209,193,0.1)',
-              border: '1.5px solid ' + (overpayVnd > 0 ? 'rgba(239,68,68,0.3)' : 'rgba(31,209,193,0.3)'),
-            }}>
+            <div
+              className={overpayVnd > 0 ? 'animate-pulse-glow' : ''}
+              style={{
+                padding: '18px', borderRadius: 16,
+                background: overpayVnd > 0 ? 'rgba(239,68,68,0.12)' : 'rgba(31,209,193,0.1)',
+                border: '1.5px solid ' + (overpayVnd > 0 ? 'rgba(239,68,68,0.3)' : 'rgba(31,209,193,0.3)'),
+              }}
+            >
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                 <span style={{ fontSize: 18 }}>{overpayVnd > 0 ? '🚨' : '✅'}</span>
                 <span style={{ fontSize: 15, fontWeight: 800, color: overpayVnd > 0 ? '#ef4444' : '#1fd1c1' }}>
