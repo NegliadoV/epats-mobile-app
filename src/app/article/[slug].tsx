@@ -8,7 +8,7 @@ import { iconForCategory } from '@/lib/tropicIconMap';
 import { Screen, T, tap } from '@/components/ui';
 import { WEB_BASE } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
-import { getArticleBySlug } from '@shared/data/articles';
+import { getArticleBySlug } from '@/data/articles';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fonts, space } from '@/theme/tokens';
 

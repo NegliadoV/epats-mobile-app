@@ -11,7 +11,7 @@ import { Card, Chip, GradientButton, Screen, T, tap } from '@/components/ui';
 import BrandLogo from '@/components/BrandLogo';
 import { WEB_BASE } from '@/lib/api';
 import { useAuth, CityId, VisaTypeId, CurrencyId, LifestyleId, FamilyId } from '@/lib/auth';
-import { getArticleBySlug } from '@shared/data/articles';
+import { getArticleBySlug } from '@/data/articles';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fonts, radius, space } from '@/theme/tokens';
 

@@ -7,7 +7,7 @@ import { Card, Chip, Screen, T, tap } from '@/components/ui';
 import BrandLogo from '@/components/BrandLogo';
 import TropicIcon from '@/components/TropicIcon';
 import { iconForCategory } from '@/lib/tropicIconMap';
-import { ARTICLES, CATEGORIES } from '@shared/data/articles';
+import { ARTICLES, CATEGORIES } from '@/data/articles';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fonts, radius, space } from '@/theme/tokens';
 

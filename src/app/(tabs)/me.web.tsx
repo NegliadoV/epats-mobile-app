@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useMemo } from 'react';
 import { router } from 'expo-router';
-import { ARTICLES, getArticleBySlug } from '@shared/data/articles';
+import { ARTICLES, getArticleBySlug } from '@/data/articles';
 import BrandLogo from '@/components/BrandLogo';
 import { useAuth, CityId, VisaTypeId, CurrencyId, LifestyleId, FamilyId } from '@/lib/auth';
 

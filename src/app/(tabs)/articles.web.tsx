@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useMemo } from 'react';
 import { router } from 'expo-router';
-import { ARTICLES, CATEGORIES } from '@shared/data/articles';
+import { ARTICLES, CATEGORIES } from '@/data/articles';
 import BrandLogo from '@/components/BrandLogo';
 
 function formatDate(dateStr: string) {

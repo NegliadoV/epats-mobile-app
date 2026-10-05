@@ -4,7 +4,7 @@ import { useLocalSearchParams, router } from 'expo-router';
 import BrandLogo from '@/components/BrandLogo';
 import TropicIcon from '@/components/TropicIcon';
 import { iconForCategory } from '@/lib/tropicIconMap';
-import { getArticleBySlug, ARTICLES, getCategoryBySlug } from '@shared/data/articles';
+import { getArticleBySlug, ARTICLES, getCategoryBySlug } from '@/data/articles';
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });

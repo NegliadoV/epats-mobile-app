@@ -9,7 +9,7 @@ import BrandLogo from '@/components/BrandLogo';
 import TropicalHeroScene from '@/components/TropicalHeroScene';
 import TropicIcon from '@/components/TropicIcon';
 import { iconForCategory } from '@/lib/tropicIconMap';
-import { ARTICLES } from '@shared/data/articles';
+import { ARTICLES } from '@/data/articles';
 import { useAuth } from '@/lib/auth';
 import { useHistory, useRates, useWeather } from '@/lib/data';
 import { nf, timeAgo } from '@/lib/format';

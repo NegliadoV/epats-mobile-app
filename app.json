@@ -11,7 +11,7 @@
     "ios": {
       "bundleIdentifier": "io.epats.app",
       "supportsTablet": true,
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/images/icon.png"
     },
     "android": {
       "package": "io.epats.app",

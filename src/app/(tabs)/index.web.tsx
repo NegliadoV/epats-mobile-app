@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { router } from 'expo-router';
-import { ARTICLES, CATEGORIES, getFeaturedArticles } from '@shared/data/articles';
+import { ARTICLES, CATEGORIES, getFeaturedArticles } from '@/data/articles';
 import { useRates, useWeather, useHistory } from '@/lib/data';
 import BrandLogo from '@/components/BrandLogo';
 import TropicIcon from '@/components/TropicIcon';

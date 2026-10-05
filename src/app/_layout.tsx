@@ -15,7 +15,7 @@ import { AuthProvider, useAuth } from '@/lib/auth';
 import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
 import { fonts } from '@/theme/tokens';
 
-SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 function RootStack() {
   const { c, theme } = useTheme();
@@ -73,7 +73,7 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (loaded) SplashScreen.hideAsync();
+    if (loaded) SplashScreen.hideAsync().catch(() => {});
     if (Platform.OS === 'web' && typeof document !== 'undefined') {
       const styleId = 'expo-web-scroll-fix';
       if (!document.getElementById(styleId)) {
