@@ -49,6 +49,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "d1ae0b21-fbd1-442f-891c-2c659eb5d2e8"
+      }
+    },
+    "owner": "ipnegliadov"
   }
 }
