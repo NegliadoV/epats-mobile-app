@@ -15,7 +15,7 @@ export default function ToolsScreen() {
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
         <BrandLogo size={28} />
         <Text style={{ fontFamily: fonts.display, fontSize: 18, color: c.textPrimary }}>
-          epats<Text style={{ color: c.coral }}>.io</Text>
+          epats<Text style={{ color: c.coral }}>.wiki</Text>
         </Text>
       </View>
       <View style={{ gap: 6 }}>
