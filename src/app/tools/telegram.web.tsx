@@ -89,7 +89,7 @@ export default function TelegramWebScreen() {
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>
             <BrandLogo size={20} />
-            <span style={{ color: '#fff', fontWeight: 800 }}>epats.io</span> → <span style={{ color: '#1fd1c1' }}>Чаты экспатов</span>
+            <span style={{ color: '#fff', fontWeight: 800 }}>epats.wiki</span> → <span style={{ color: '#1fd1c1' }}>Чаты экспатов</span>
           </div>
         </div>
 
@@ -128,10 +128,10 @@ export default function TelegramWebScreen() {
                 ⚡ Telegram WebApp (TWA)
               </div>
               <h2 style={{ fontSize: 20, fontWeight: 900, color: '#fff', margin: '0 0 8px' }}>
-                🤖 epats.io работает прямо внутри Telegram!
+                🤖 epats.wiki работает прямо внутри Telegram!
               </h2>
               <p style={{ fontSize: 13, color: '#cbd5e1', margin: 0, lineHeight: 1.6 }}>
-                Запустите официального бота <strong>@epatsiobot</strong>: в чате доступна постоянная кнопка «🌴 Открыть epats.io». Калькулятор бюджета, Bybit P2P конвертер и радар погоды открываются прямо в Telegram в 1 клик!
+                Запустите официального бота <strong>@epatsiobot</strong>: в чате доступна постоянная кнопка «🌴 Открыть epats.wiki». Калькулятор бюджета, Bybit P2P конвертер и радар погоды открываются прямо в Telegram в 1 клик!
               </p>
             </div>
             <a

@@ -3,7 +3,7 @@ import Constants from 'expo-constants';
 import * as SecureStore from 'expo-secure-store';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-/* ─── API-клиент к epats.io ─── */
+/* ─── API-клиент к epats.wiki ─── */
 
 function resolveApiBase(): string {
   if (process.env.EXPO_PUBLIC_API_BASE) {
@@ -24,7 +24,7 @@ function resolveApiBase(): string {
       return `http://${host}:3000`;
     }
   }
-  return 'https://epats.vercel.app';
+  return 'https://epats.wiki';
 }
 
 export const API_BASE = resolveApiBase();

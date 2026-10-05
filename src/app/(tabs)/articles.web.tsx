@@ -96,7 +96,7 @@ export default function ArticlesWebScreen() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 28, fontSize: 13, color: '#64748b' }}>
           <div onClick={() => router.push('/' as any)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer', color: '#fff', fontWeight: 800 }}>
             <BrandLogo size={18} />
-            <span>epats.io</span>
+            <span>epats.wiki</span>
           </div>
           <span>→</span>
           <span style={{ color: '#1fd1c1', fontWeight: 700 }}>Статьи и база знаний</span>

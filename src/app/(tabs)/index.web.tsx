@@ -617,7 +617,7 @@ export default function HomeWebScreen() {
                     Умные уведомления в Telegram <span style={{ color: '#2aabee' }}>@epatsiobot</span>
                   </h2>
                   <p style={{ fontSize: 15, color: '#94a3b8', margin: 0, lineHeight: 1.6 }}>
-                    Подключи бота в 1 клик без паролей и почты. epats.io сохранит твои настройки в облачной БД, а бот вовремя пришлёт важные напоминания прямо в личку.
+                    Подключи бота в 1 клик без паролей и почты. epats.wiki сохранит твои настройки в облачной БД, а бот вовремя пришлёт важные напоминания прямо в личку.
                   </p>
                 </div>
 
@@ -978,10 +978,10 @@ export default function HomeWebScreen() {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <BrandLogo size={24} />
-            <strong style={{ color: '#fff' }}>epats.io</strong> · Журнал и сервисы для русскоязычных экспатов во Вьетнаме
+            <strong style={{ color: '#fff' }}>epats.wiki</strong> · Журнал и сервисы для русскоязычных экспатов во Вьетнаме
           </div>
           <div>
-            © 2026 epats.io · Сделано у моря
+            © 2026 epats.wiki · Сделано у моря
           </div>
         </footer>
 

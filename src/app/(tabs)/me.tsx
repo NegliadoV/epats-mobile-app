@@ -153,7 +153,7 @@ export default function MeScreen() {
           <View style={{ gap: 4, alignItems: 'center' }}>
             <T v="h2">Синхронизация профиля</T>
             <T v="muted" style={{ textAlign: 'center', fontSize: 13 }}>
-              Войдите через Telegram — город, виза, даты и избранное синхронизируются с сервером и базой данных epats.io.
+              Войдите через Telegram — город, виза, даты и избранное синхронизируются с сервером и базой данных epats.wiki.
             </T>
           </View>
           {loginState === 'waiting' ? (
@@ -458,7 +458,7 @@ function SupportCard() {
       <Heart size={22} color={c.coral} fill={c.coral} />
       <View style={{ flex: 1 }}>
         <T v="h3">Поддержать проект</T>
-        <T v="muted">epats.io делают экспаты для экспатов</T>
+        <T v="muted">epats.wiki делают экспаты для экспатов</T>
       </View>
     </Card>
   );

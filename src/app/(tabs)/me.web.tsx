@@ -253,7 +253,7 @@ export default function MeWebScreen() {
               Синхронизация профиля
             </div>
             <div style={{ fontSize: '13px', color: '#94a3b8', lineHeight: 1.5, marginBottom: '18px' }}>
-              Войдите через Telegram — город, виза, даты и избранное синхронизируются с сервером и базой данных epats.io.
+              Войдите через Telegram — город, виза, даты и избранное синхронизируются с сервером и базой данных epats.wiki.
             </div>
 
             {loginState === 'waiting' ? (

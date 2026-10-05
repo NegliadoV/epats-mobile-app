@@ -10,7 +10,7 @@ export default function BrandLogo({ size = 34 }: { size?: number }) {
       width={size}
       height={size}
       viewBox="0 0 40 40"
-      aria-label="epats.io logo"
+      aria-label="epats.wiki logo"
       style={{ display: 'block', flexShrink: 0 }}
     >
       <defs>

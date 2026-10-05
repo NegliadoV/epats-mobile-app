@@ -111,7 +111,7 @@ export default function ElectricityWebScreen() {
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>
             <BrandLogo size={20} />
-            <span style={{ color: '#fff', fontWeight: 800 }}>epats.io</span> → <span style={{ color: '#f59e0b' }}>Счёт за свет (EVN)</span>
+            <span style={{ color: '#fff', fontWeight: 800 }}>epats.wiki</span> → <span style={{ color: '#f59e0b' }}>Счёт за свет (EVN)</span>
           </div>
         </div>
 

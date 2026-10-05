@@ -495,7 +495,7 @@ export default function OnboardingScreen() {
             }}
           >
             <Text style={{ fontFamily: fonts.bodyHeavy, color: '#fff', fontSize: 15 }}>
-              {isLastStep ? 'Готово, открыть epats.io 🚀' : 'Далее →'}
+              {isLastStep ? 'Готово, открыть epats.wiki 🚀' : 'Далее →'}
             </Text>
           </Pressable>
         </View>

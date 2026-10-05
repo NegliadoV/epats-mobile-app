@@ -435,21 +435,21 @@ function generateIcsCalendar(deadline: Date, visaName: string): string {
   return [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//epats.io//Vietnam Visa Tracker//RU',
+    'PRODID:-//epats.wiki//Vietnam Visa Tracker//RU',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
-    'X-WR-CALNAME:Дедлайн визы во Вьетнаме (epats.io)',
+    'X-WR-CALNAME:Дедлайн визы во Вьетнаме (epats.wiki)',
     'BEGIN:VEVENT',
-    `UID:visa-${dStart}-${Date.now()}@epats.io`,
+    `UID:visa-${dStart}-${Date.now()}@epats.wiki`,
     `DTSTAMP:${now}Z`,
     `DTSTART;VALUE=DATE:${dStart}`,
     `DTEND;VALUE=DATE:${dEnd}`,
     `SUMMARY:🚨 Дедлайн визы во Вьетнаме (${visaName})`,
-    'DESCRIPTION:Крайний день легального нахождения во Вьетнаме. До 23:59 необходимо пересечь границу или вылететь из страны.\\nПодробнее: https://epats.io/tools/visa',
+    'DESCRIPTION:Крайний день легального нахождения во Вьетнаме. До 23:59 необходимо пересечь границу или вылететь из страны.\\nПодробнее: https://epats.wiki/tools/visa',
     'STATUS:CONFIRMED',
     'BEGIN:VALARM',
     'ACTION:DISPLAY',
-    'DESCRIPTION:🔔 epats.io: До окончания визы осталось 7 дней! Пора подавать на новую E-visa или бронировать визаран.',
+    'DESCRIPTION:🔔 epats.wiki: До окончания визы осталось 7 дней! Пора подавать на новую E-visa или бронировать визаран.',
     'TRIGGER:-P7D',
     'END:VALARM',
     'BEGIN:VALARM',
@@ -599,7 +599,7 @@ export default function VisaRunUnifiedPage() {
     const perm = await Notification.requestPermission();
     setPushStatus(perm);
     if (perm === 'granted') {
-      new Notification('🔔 epats.io: Напоминания активированы!', {
+      new Notification('🔔 epats.wiki: Напоминания активированы!', {
         body: `Дедлайн ${formatDate(result!.deadline)}. Напоминания сработают за 7 и 3 дня до даты выезда.`,
       });
     } else {
@@ -728,7 +728,7 @@ export default function VisaRunUnifiedPage() {
           {/* Breadcrumbs */}
           <nav style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, fontSize: 13 }}>
             <BrandLogo size={20} />
-            <a href="/" style={{ color: '#fff', fontWeight: 800, textDecoration: 'none' }}>epats.io</a>
+            <a href="/" style={{ color: '#fff', fontWeight: 800, textDecoration: 'none' }}>epats.wiki</a>
             <span style={{ color: 'var(--text-muted)' }}>→</span>
             <a href="/tools" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>Инструменты</a>
             <span style={{ color: 'var(--text-muted)' }}>→</span>
