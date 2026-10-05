@@ -2,6 +2,8 @@
 import React from 'react';
 import { router } from 'expo-router';
 import BrandLogo from '@/components/BrandLogo';
+import TropicIcon from '@/components/TropicIcon';
+import { iconForTool } from '@/lib/tropicIconMap';
 
 const TOOLS = [
   {
@@ -215,7 +217,7 @@ export default function ToolsWebScreen() {
                   {tool.badge}
                 </span>
               )}
-              <div className="icon-spring" style={{ fontSize: 44, marginBottom: 14 }}>{tool.icon}</div>
+              <div className="icon-spring" style={{ marginBottom: 14 }}><TropicIcon name={iconForTool(tool.href)} size={48} /></div>
               <h2 style={{ fontSize: 18, fontWeight: 900, color: '#fff', margin: '0 0 10px', lineHeight: 1.3 }}>
                 {tool.title}
               </h2>

@@ -3,6 +3,7 @@ import { Text, View } from 'react-native';
 
 import { Card, Screen, T } from '@/components/ui';
 import BrandLogo from '@/components/BrandLogo';
+import TropicIcon from '@/components/TropicIcon';
 import { openTool, TOOLS } from '@/lib/tools';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fonts, radius, space } from '@/theme/tokens';
@@ -23,9 +24,7 @@ export default function ToolsScreen() {
       </View>
       {TOOLS.map(t => (
         <Card key={t.href} onPress={() => openTool(t.href)} style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
-          <View style={{ width: 52, height: 52, borderRadius: radius.md, backgroundColor: c.bgSecondary, alignItems: 'center', justifyContent: 'center' }}>
-            <Text style={{ fontSize: 28 }}>{t.emoji}</Text>
-          </View>
+          <TropicIcon name={t.icon} size={48} />
           <View style={{ flex: 1, gap: 2 }}>
             <Text style={{ fontFamily: fonts.bodyHeavy, fontSize: 15.5, color: c.textPrimary }}>{t.name}</Text>
             <T v="muted">{t.desc}</T>

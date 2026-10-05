@@ -6,6 +6,8 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Sparkline } from '@/components/Sparkline';
 import { Card, Chip, GradientButton, Screen, SectionTitle, T, tap } from '@/components/ui';
 import BrandLogo from '@/components/BrandLogo';
+import TropicIcon from '@/components/TropicIcon';
+import { iconForCategory } from '@/lib/tropicIconMap';
 import { ARTICLES } from '@shared/data/articles';
 import { useAuth } from '@/lib/auth';
 import { useHistory, useRates, useWeather } from '@/lib/data';
@@ -276,8 +278,8 @@ export default function Home() {
       <SectionTitle title="Инструменты" action="Все" onAction={() => router.push('/tools')} />
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
         {TOOLS.slice(0, 6).map(t => (
-          <Card key={t.href} onPress={() => openTool(t.href)} style={{ width: '31%', flexGrow: 1, padding: space.md, alignItems: 'flex-start', gap: 6 }}>
-            <Text style={{ fontSize: 26 }}>{t.emoji}</Text>
+          <Card key={t.href} onPress={() => openTool(t.href)} style={{ width: '31%', flexGrow: 1, padding: space.md, alignItems: 'flex-start', gap: 8 }}>
+            <TropicIcon name={t.icon} size={36} />
             <Text numberOfLines={2} style={{ fontFamily: fonts.bodyBold, fontSize: 12.5, color: c.textPrimary }}>{t.name}</Text>
           </Card>
         ))}
@@ -287,7 +289,7 @@ export default function Home() {
       <SectionTitle title="Главное почитать" action="Все статьи" onAction={() => router.push('/articles')} />
       {featured.map(a => (
         <Card key={a.slug} onPress={() => router.push(`/article/${a.slug}`)} style={{ flexDirection: 'row', gap: space.md, alignItems: 'center' }}>
-          <Text style={{ fontSize: 30 }}>{a.emoji}</Text>
+          <TropicIcon name={iconForCategory(a.categorySlug)} size={42} />
           <View style={{ flex: 1, gap: 4 }}>
             <T v="h3" numberOfLines={2} style={{ fontSize: 15 }}>{a.title}</T>
             <T v="muted">{a.category} · {a.readTime} мин</T>

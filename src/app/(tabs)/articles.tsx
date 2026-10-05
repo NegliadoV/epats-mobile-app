@@ -5,6 +5,8 @@ import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
 import { Card, Chip, Screen, T, tap } from '@/components/ui';
 import BrandLogo from '@/components/BrandLogo';
+import TropicIcon from '@/components/TropicIcon';
+import { iconForCategory } from '@/lib/tropicIconMap';
 import { ARTICLES, CATEGORIES } from '@shared/data/articles';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fonts, radius, space } from '@/theme/tokens';
@@ -88,8 +90,8 @@ export default function ArticlesScreen() {
       ) : (
         list.map(a => (
           <Card key={a.slug} onPress={() => router.push(`/article/${a.slug}`)} style={{ gap: 8 }}>
-            <View style={{ flexDirection: 'row', gap: space.md, alignItems: 'flex-start' }}>
-              <Text style={{ fontSize: 30 }}>{a.emoji}</Text>
+            <View style={{ flexDirection: 'row', gap: space.md, alignItems: 'center' }}>
+              <TropicIcon name={iconForCategory(a.categorySlug)} size={42} />
               <View style={{ flex: 1, gap: 4 }}>
                 <Text style={{ fontFamily: fonts.bodyBold, fontSize: 11.5, color: c.coral, textTransform: 'uppercase', letterSpacing: 0.5 }}>{a.category}</Text>
                 <T v="h3" style={{ fontSize: 15.5 }}>{a.title}</T>

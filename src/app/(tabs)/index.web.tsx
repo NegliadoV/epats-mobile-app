@@ -4,6 +4,8 @@ import { router } from 'expo-router';
 import { ARTICLES, CATEGORIES, getFeaturedArticles } from '@shared/data/articles';
 import { useRates, useWeather, useHistory } from '@/lib/data';
 import BrandLogo from '@/components/BrandLogo';
+import TropicIcon from '@/components/TropicIcon';
+import { iconForTool, iconForCategory } from '@/lib/tropicIconMap';
 import { useAuth } from '@/lib/auth';
 
 const CITY_OPTIONS = [

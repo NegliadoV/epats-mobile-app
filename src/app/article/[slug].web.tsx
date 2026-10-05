@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocalSearchParams, router } from 'expo-router';
 import BrandLogo from '@/components/BrandLogo';
+import TropicIcon from '@/components/TropicIcon';
+import { iconForCategory } from '@/lib/tropicIconMap';
 import { getArticleBySlug, ARTICLES, getCategoryBySlug } from '@shared/data/articles';
 
 function formatDate(dateStr: string) {
@@ -334,7 +336,7 @@ export default function ArticleWebScreen() {
           boxShadow: '0 20px 40px -15px rgba(0, 0, 0, 0.5)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 32 }}>{article.emoji}</span>
+            <TropicIcon name={iconForCategory(article.categorySlug)} size={48} />
             <span style={{
               background: 'rgba(31,209,193,0.15)', border: '1px solid rgba(31,209,193,0.3)',
               borderRadius: 999, padding: '4px 12px', fontSize: 12, fontWeight: 800, color: '#1fd1c1',

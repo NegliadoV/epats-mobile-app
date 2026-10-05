@@ -3,6 +3,8 @@ import { Bookmark, Share2 } from 'lucide-react-native';
 import { Pressable, Share, Text, View } from 'react-native';
 
 import { Markdown } from '@/components/Markdown';
+import TropicIcon from '@/components/TropicIcon';
+import { iconForCategory } from '@/lib/tropicIconMap';
 import { Screen, T, tap } from '@/components/ui';
 import { WEB_BASE } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
@@ -50,7 +52,7 @@ export default function ArticleScreen() {
       />
       <Screen padTop={false}>
         <View style={{ gap: space.sm }}>
-          <Text style={{ fontSize: 44 }}>{a.emoji}</Text>
+          <TropicIcon name={iconForCategory(a.categorySlug)} size={52} />
           <Text style={{ fontFamily: fonts.bodyBold, fontSize: 12, color: c.coral, textTransform: 'uppercase', letterSpacing: 0.6 }}>
             {a.category} · {a.readTime} мин
           </Text>

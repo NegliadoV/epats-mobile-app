@@ -2,6 +2,8 @@ import { useState, useMemo, useEffect } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { Card, Chip, Screen, T, tap } from '@/components/ui';
+import TropicIcon from '@/components/TropicIcon';
+import type { TropicIconName } from '@/lib/tropicIconMap';
 import { useAuth, CityId, LifestyleId, FamilyId, CurrencyId } from '@/lib/auth';
 import { useRates, Cur } from '@/lib/data';
 import { nf, money } from '@/lib/format';
@@ -29,13 +31,13 @@ const FAMILY_OPTIONS = [
   { id: 'big_family', name: 'Большая семья', icon: '👨‍👩‍👧‍👦', mults: { rent: 1.7, food: 2.8, transport: 2.0, visa: 3.8, other: 2.8 } },
 ] as const;
 
-const BASE_ITEMS = [
-  { key: 'rent', name: 'Жильё и коммуналка', emoji: '🏠', baseVnd: 10_000_000, type: 'rent' },
-  { key: 'food', name: 'Еда и продукты', emoji: '🍜', baseVnd: 7_000_000, type: 'food' },
-  { key: 'transport', name: 'Байк и бензин', emoji: '🛵', baseVnd: 2_500_000, type: 'transport' },
-  { key: 'visa', name: 'Виза и визараны', emoji: '🚌', baseVnd: 1_800_000, type: 'visa' },
-  { key: 'cafes', name: 'Кафе и развлечения', emoji: '☕', baseVnd: 3_500_000, type: 'other' },
-  { key: 'buffer', name: 'Медицина и буфер', emoji: '🛡️', baseVnd: 2_200_000, type: 'other' },
+const BASE_ITEMS: { key: string; name: string; emoji: string; icon: TropicIconName; baseVnd: number; type: string }[] = [
+  { key: 'rent', name: 'Жильё и коммуналка', emoji: '🏠', icon: 'house', baseVnd: 10_000_000, type: 'rent' },
+  { key: 'food', name: 'Еда и продукты', emoji: '🍜', icon: 'food', baseVnd: 7_000_000, type: 'food' },
+  { key: 'transport', name: 'Байк и бензин', emoji: '🛵', icon: 'scooter', baseVnd: 2_500_000, type: 'transport' },
+  { key: 'visa', name: 'Виза и визараны', emoji: '🚌', icon: 'visa', baseVnd: 1_800_000, type: 'visa' },
+  { key: 'cafes', name: 'Кафе и развлечения', emoji: '☕', icon: 'coffee', baseVnd: 3_500_000, type: 'other' },
+  { key: 'buffer', name: 'Медицина и буфер', emoji: '🛡️', icon: 'health', baseVnd: 2_200_000, type: 'other' },
 ];
 
 export default function BudgetCalculator() {
@@ -197,7 +199,7 @@ export default function BudgetCalculator() {
             <Card key={it.key} style={{ paddingVertical: 12, gap: 8 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                  <Text style={{ fontSize: 20 }}>{it.emoji}</Text>
+                  <TropicIcon name={it.icon} size={28} />
                   <Text style={{ fontFamily: fonts.bodyHeavy, color: c.textPrimary, fontSize: 14 }}>{it.name}</Text>
                 </View>
                 <Text style={{ fontFamily: fonts.bodyHeavy, color: c.textPrimary, fontSize: 15 }}>
