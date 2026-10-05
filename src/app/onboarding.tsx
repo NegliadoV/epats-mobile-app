@@ -36,17 +36,40 @@ const VISAS: { id: VisaTypeId | 'tourist' | 'trc' | 'exploring'; name: string; b
 
 const TOURIST_DAYS = [7, 10, 14, 21, 30, 45];
 
-const LIFESTYLES: { id: LifestyleId; title: string; cost: string; desc: string; icon: string }[] = [
-  { id: 'budget', title: 'Эконом', cost: '$600 – $800 / мес', desc: 'Студия, рынки, байк, без излишеств', icon: '🎒' },
-  { id: 'comfort', title: 'Комфорт', cost: '$1 000 – $1 500 / мес', desc: 'Кондо с бассейном, кафе, Grab, страховка', icon: '🛋️' },
-  { id: 'premium', title: 'Премиум', cost: '$2 000+ / мес', desc: 'Вилла / пентхаус, рестораны, поездки', icon: '💎' },
-];
-
 const FAMILIES: { id: FamilyId; label: string; icon: string }[] = [
   { id: 'solo', label: 'Один', icon: '👤' },
-  { id: 'couple', label: 'Пара', icon: '👫' },
+  { id: 'couple', label: 'Вдвоём (пара)', icon: '👫' },
   { id: 'family', label: 'С семьей / детьми', icon: '👨‍👩‍👧' },
 ];
+
+const LIFESTYLES: { id: LifestyleId; title: string; icon: string }[] = [
+  { id: 'budget', title: 'Эконом', icon: '🎒' },
+  { id: 'comfort', title: 'Комфорт', icon: '🛋️' },
+  { id: 'premium', title: 'Премиум', icon: '💎' },
+];
+
+const BUDGET_CONFIG: Record<FamilyId, Record<LifestyleId, { cost: string; min: number; max: number; desc: string }>> = {
+  solo: {
+    budget: { cost: '$500 – $800 / мес', min: 500, max: 800, desc: 'Студия, рынки, байк, кафе для местных' },
+    comfort: { cost: '$1 000 – $1 500 / мес', min: 1000, max: 1500, desc: '1-к кондо с бассейном, Grab, европейские кафе' },
+    premium: { cost: '$2 000 – $3 500 / мес', min: 2000, max: 3500, desc: 'Апартаменты у моря, рестораны, путешествия' },
+  },
+  couple: {
+    budget: { cost: '$800 – $1 200 / мес', min: 800, max: 1200, desc: 'Хорошая 1-к квартира, совместные расходы, байк' },
+    comfort: { cost: '$1 500 – $2 300 / мес', min: 1500, max: 2300, desc: 'Просторное 2-к кондо, кафе, такси, коворкинг' },
+    premium: { cost: '$3 000 – $5 000 / мес', min: 3000, max: 5000, desc: 'Видовой кондо / вилла, путешествия по Азии' },
+  },
+  family: {
+    budget: { cost: '$1 300 – $1 900 / мес', min: 1300, max: 1900, desc: '2-к квартира или дом, рынки, без платной школы' },
+    comfort: { cost: '$2 200 – $3 500 / мес', min: 2200, max: 3500, desc: '3-к кондо с охраной, детсад/секции, авто/Grab' },
+    premium: { cost: '$4 000 – $7 000 / мес', min: 4000, max: 7000, desc: 'Вилла, международная школа, страховка, помощница' },
+  },
+  big_family: {
+    budget: { cost: '$1 800 – $2 600 / мес', min: 1800, max: 2600, desc: '3-к квартира или просторный дом, рынки' },
+    comfort: { cost: '$3 000 – $4 800 / мес', min: 3000, max: 4800, desc: 'Большое кондо/вилла, секции, авто, медицина' },
+    premium: { cost: '$5 000 – $9 000 / мес', min: 5000, max: 9000, desc: 'Премиум вилла, международные школы, персонал' },
+  },
+};
 
 const FROM_CURRENCIES: { id: CurrencyId; label: string; flag: string }[] = [
   { id: 'RUB', label: 'Рубли (₽)', flag: '🇷🇺' },
@@ -107,13 +130,16 @@ export default function OnboardingScreen() {
       ? '45'
       : selectedVisa;
 
+    const range = BUDGET_CONFIG[selectedFamily]?.[selectedLifestyle] || BUDGET_CONFIG.solo.comfort;
+    const calculatedBudget = Math.round((range.min + range.max) / 2);
+
     await saveSettings({
       city,
       visa_type: visaType,
       currency: fromCurrency,
       lifestyle: selectedLifestyle,
       family: selectedFamily,
-      budget_usd: selectedLifestyle === 'budget' ? 700 : selectedLifestyle === 'comfort' ? 1200 : 2500,
+      budget_usd: calculatedBudget,
       notify_visa: true,
       notify_alerts: true,
     });
@@ -335,13 +361,30 @@ export default function OnboardingScreen() {
             </View>
             <T v="h1">Какой уровень комфорта вы планируете?</T>
             <T v="body">
-              Калькулятор расходов и подбор районов сразу подстроятся под ваши ожидания.
+              Калькулятор расходов подберёт реалистичный диапазон «от и до» под ваш состав.
             </T>
           </View>
 
+          {/* Состав семьи сверху */}
+          <Card style={{ gap: space.sm }}>
+            <T v="label">С кем вы путешествуете?</T>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              {FAMILIES.map(fm => (
+                <Chip
+                  key={fm.id}
+                  label={`${fm.icon} ${fm.label}`}
+                  active={selectedFamily === fm.id}
+                  onPress={() => { tap(); setSelectedFamily(fm.id); }}
+                />
+              ))}
+            </View>
+          </Card>
+
+          {/* Уровни комфорта с динамическими диапазонами от-до */}
           <View style={{ gap: 10 }}>
             {LIFESTYLES.map(lf => {
               const active = selectedLifestyle === lf.id;
+              const info = BUDGET_CONFIG[selectedFamily]?.[lf.id] || BUDGET_CONFIG.solo[lf.id];
               return (
                 <Card
                   key={lf.id}
@@ -359,30 +402,16 @@ export default function OnboardingScreen() {
                         {lf.title}
                       </Text>
                       <Text style={{ fontFamily: fonts.bodyBold, fontSize: 13, color: c.coral }}>
-                        {lf.cost}
+                        {info.cost}
                       </Text>
                     </View>
-                    <T v="muted" style={{ fontSize: 12 }}>{lf.desc}</T>
+                    <T v="muted" style={{ fontSize: 12 }}>{info.desc}</T>
                   </View>
                   {active && <CheckCircle2 size={20} color={c.accent} />}
                 </Card>
               );
             })}
           </View>
-
-          <Card style={{ gap: space.sm }}>
-            <T v="label">С кем вы едете?</T>
-            <View style={{ flexDirection: 'row', gap: 8 }}>
-              {FAMILIES.map(fm => (
-                <Chip
-                  key={fm.id}
-                  label={`${fm.icon} ${fm.label}`}
-                  active={selectedFamily === fm.id}
-                  onPress={() => { tap(); setSelectedFamily(fm.id); }}
-                />
-              ))}
-            </View>
-          </Card>
         </View>
       )}
 
