@@ -1,8 +1,9 @@
 import { Check, X, ShieldAlert, Star, DollarSign } from 'lucide-react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 
 import { Card, Chip, Screen, T, tap } from '@/components/ui';
+import { useAuth } from '@/lib/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fonts, radius, space } from '@/theme/tokens';
 
@@ -71,7 +72,12 @@ const CITIES = [
 
 export default function CitiesComparison() {
   const { c } = useTheme();
-  const [cityId, setCityId] = useState('danang');
+  const { settings } = useAuth();
+  const [cityId, setCityId] = useState<string>(settings?.city || 'danang');
+
+  useEffect(() => {
+    if (settings?.city) setCityId(settings.city);
+  }, [settings?.city]);
 
   const city = CITIES.find(x => x.id === cityId) || CITIES[0];
 

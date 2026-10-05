@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { router } from 'expo-router';
 import BrandLogo from '@/components/BrandLogo';
+import { useAuth } from '@/lib/auth';
 import { API_BASE } from '@/lib/api';
 
 const CURRENCY_META = [
@@ -90,8 +91,13 @@ export default function ConverterWebScreen() {
   const [history, setHistory] = useState<HistoryPayload | null>(null);
   const [rateMode, setRateMode] = useState<RateMode>('official');
   const [amount, setAmount] = useState('1000000');
+  const { settings } = useAuth();
   const [from, setFrom] = useState<CurId>('VND');
-  const [to, setTo] = useState<CurId>('RUB');
+  const [to, setTo] = useState<CurId>((settings?.currency as CurId) || 'RUB');
+
+  useEffect(() => {
+    if (settings?.currency) setTo(settings.currency as CurId);
+  }, [settings?.currency]);
   const [selectedPair, setSelectedPair] = useState<PairId>('USD_RUB');
 
   useEffect(() => {

@@ -6,8 +6,13 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 export const API_BASE =
   process.env.EXPO_PUBLIC_API_BASE ??
-  (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? 'http://localhost:3000'
+  (typeof window !== 'undefined' &&
+  (window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    window.location.hostname.startsWith('192.168.') ||
+    window.location.hostname.startsWith('10.') ||
+    window.location.hostname.startsWith('172.'))
+    ? `http://${window.location.hostname}:3000`
     : 'https://epats.vercel.app');
 export const WEB_BASE = API_BASE;
 const TOKEN_KEY = 'epats_session';

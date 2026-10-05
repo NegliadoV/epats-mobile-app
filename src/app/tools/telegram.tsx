@@ -1,8 +1,9 @@
 import { Send, CheckCircle2, ExternalLink } from 'lucide-react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Linking, Pressable, ScrollView, Text, View } from 'react-native';
 
 import { Card, Chip, Screen, T, tap } from '@/components/ui';
+import { useAuth } from '@/lib/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fonts, radius, space } from '@/theme/tokens';
 
@@ -59,9 +60,21 @@ const CHATS: CityGroup[] = [
   },
 ];
 
+
+function cityIdToName(id?: string | null): string {
+  if (id === 'nhatrang') return 'Нячанг';
+  if (id === 'hcm') return 'Хошимин';
+  return 'Дананг';
+}
+
 export default function TelegramChats() {
   const { c } = useTheme();
-  const [selectedCity, setSelectedCity] = useState<string>('Дананг');
+  const { settings } = useAuth();
+  const [selectedCity, setSelectedCity] = useState<string>(cityIdToName(settings?.city));
+
+  useEffect(() => {
+    if (settings?.city) setSelectedCity(cityIdToName(settings.city));
+  }, [settings?.city]);
 
   const current = CHATS.find(x => x.city === selectedCity) || CHATS[0];
 

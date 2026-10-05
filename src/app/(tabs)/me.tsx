@@ -46,6 +46,7 @@ const FAMILIES: { id: FamilyId; label: string }[] = [
   { id: 'solo', label: '👤 Один' },
   { id: 'couple', label: '👫 Пара' },
   { id: 'family', label: '👨‍👩‍👧 Семья' },
+  { id: 'big_family', label: '👨‍👩‍👧‍👦 Большая семья' },
 ];
 
 export default function MeScreen() {
@@ -320,7 +321,7 @@ export default function MeScreen() {
 
         <View style={{ gap: 6 }}>
           <T v="label">Состав</T>
-          <View style={{ flexDirection: 'row', gap: 8 }}>
+          <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
             {FAMILIES.map(fm => (
               <Chip
                 key={fm.id}

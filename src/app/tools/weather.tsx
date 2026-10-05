@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/lib/auth';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { Card, Chip, Screen, Stat, T } from '@/components/ui';
@@ -8,8 +9,15 @@ import { fonts, radius, space } from '@/theme/tokens';
 
 export default function WeatherScreen() {
   const { c } = useTheme();
+  const { settings } = useAuth();
   const { data: weatherData, refreshing, refresh } = useWeather();
-  const [city, setCity] = useState('danang');
+  const [city, setCity] = useState<string>(settings?.city || 'danang');
+
+  useEffect(() => {
+    if (settings?.city && CITY_ORDER.includes(settings.city)) {
+      setCity(settings.city);
+    }
+  }, [settings?.city]);
   const w = weatherData?.cities?.[city];
 
   return (

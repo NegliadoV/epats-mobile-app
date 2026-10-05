@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import BrandLogo from '@/components/BrandLogo';
+import { useAuth } from '@/lib/auth';
 
 type VisaType = 'evisa90_single' | 'evisa90_multi' | '45' | 'phuquoc30';
 type CalcMode = 'entry' | 'exit';
@@ -482,10 +483,19 @@ export default function VisaRunUnifiedPage() {
   const [overstayDaysInput, setOverstayDaysInput] = useState<number>(3);
   const [pushStatus, setPushStatus] = useState<string>('idle');
 
+  const { settings, saveSettings } = useAuth();
   const [calcMode, setCalcMode] = useState<CalcMode>('entry');
-  const [entryDate, setEntryDate] = useState(() => toInputDateFormat(new Date()));
+  const [entryDate, setEntryDate] = useState(() => settings?.entry_date || toInputDateFormat(new Date()));
   const [exitDate, setExitDate] = useState('');
-  const [visaType, setVisaType] = useState<VisaType>('evisa90_single');
+  const [visaType, setVisaType] = useState<VisaType>((settings?.visa_type as VisaType) || 'evisa90_single');
+
+  useEffect(() => {
+    if (settings?.entry_date) setEntryDate(settings.entry_date);
+    if (settings?.visa_type) setVisaType(settings.visa_type as VisaType);
+    if (settings?.city === 'hcm') setSelectedRouteKey('hcm_mokbai');
+    else if (settings?.city === 'hanoi') setSelectedRouteKey('hanoi_cautreo');
+    else if (settings?.city === 'nhatrang') setSelectedRouteKey('nhatrang_laobao');
+  }, [settings?.entry_date, settings?.visa_type, settings?.city]);
 
   const [result, setResult] = useState<{
     entry: Date;

@@ -26,6 +26,7 @@ const FAMILY_OPTIONS = [
   { id: 'solo', name: 'Один', icon: '👤', mults: { rent: 1.0, food: 1.0, transport: 1.0, visa: 1.0, other: 1.0 } },
   { id: 'couple', name: 'Пара', icon: '👫', mults: { rent: 1.15, food: 1.7, transport: 1.4, visa: 2.0, other: 1.6 } },
   { id: 'family', name: 'Семья', icon: '👨‍👩‍👧', mults: { rent: 1.35, food: 2.1, transport: 1.6, visa: 2.8, other: 2.1 } },
+  { id: 'big_family', name: 'Большая семья', icon: '👨‍👩‍👧‍👦', mults: { rent: 1.7, food: 2.8, transport: 2.0, visa: 3.8, other: 2.8 } },
 ] as const;
 
 const BASE_ITEMS = [
@@ -152,7 +153,7 @@ export default function BudgetCalculator() {
       {/* Состав семьи */}
       <Card style={{ gap: space.sm }}>
         <T v="label">Состав</T>
-        <View style={{ flexDirection: 'row', gap: 8 }}>
+        <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
           {FAMILY_OPTIONS.map(fm => (
             <Chip
               key={fm.id}

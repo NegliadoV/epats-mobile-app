@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { router } from 'expo-router';
 import { API_BASE } from '@/lib/api';
 import BrandLogo from '@/components/BrandLogo';
+import { useAuth } from '@/lib/auth';
 
 interface CityWeather {
   city: string;
@@ -175,9 +176,14 @@ const SAFETY_TIPS = [
 ];
 
 export default function WeatherWebScreen() {
+  const { settings } = useAuth();
   const [weatherData, setWeatherData] = useState<Record<string, CityWeather> | null>(null);
   const [typhoonData, setTyphoonData] = useState<TyphoonData | null>(null);
-  const [selectedCity, setSelectedCity] = useState<string>('danang');
+  const [selectedCity, setSelectedCity] = useState<string>(settings?.city || 'danang');
+
+  useEffect(() => {
+    if (settings?.city) setSelectedCity(settings.city);
+  }, [settings?.city]);
   const [activeScenario, setActiveScenario] = useState<'live' | 'yagi' | 'damrey'>('live');
   const [selectedScaleIndex, setSelectedScaleIndex] = useState<number>(0);
   const [loading, setLoading] = useState(true);

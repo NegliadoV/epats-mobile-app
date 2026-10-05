@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import { ARTICLES, CATEGORIES, getFeaturedArticles } from '@shared/data/articles';
 import { useRates, useWeather, useHistory } from '@/lib/data';
 import BrandLogo from '@/components/BrandLogo';
+import { useAuth } from '@/lib/auth';
 
 const CITY_OPTIONS = [
   { id: 'danang', name: 'Дананг', emoji: '🏖️' },
@@ -92,7 +93,12 @@ export default function HomeWebScreen() {
   const rates = useRates();
   const history = useHistory();
   const weather = useWeather();
-  const [selectedCity, setSelectedCity] = useState('danang');
+  const { settings } = useAuth();
+  const [selectedCity, setSelectedCity] = useState<string>(settings?.city || 'danang');
+
+  React.useEffect(() => {
+    if (settings?.city) setSelectedCity(settings.city);
+  }, [settings?.city]);
 
   const r = rates.data;
   const usdtVnd = Math.round(r.usdVnd * (r.usdtRub / r.usdRub));

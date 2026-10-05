@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { Card, Chip, Screen, T, tap } from '@/components/ui';
+import { useAuth } from '@/lib/auth';
 import { convert, CURRENCIES, Cur, useRates } from '@/lib/data';
 import { money, nf, timeAgo } from '@/lib/format';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -15,10 +16,21 @@ const QUICK: Record<Cur, number[]> = {
   USDT: [10, 50, 100, 500, 1_000],
 };
 
+
+const NOTES = [
+  { value: '500 000 ₫', color: '#3b82f6', warning: true, label: '500k — синяя! Осторожно — похожа на 20k' },
+  { value: '200 000 ₫', color: '#f59e0b', warning: false, label: '200k — жёлтая' },
+  { value: '100 000 ₫', color: '#1fd1c1', warning: true, label: '100k — зелёная! Осторожно — похожа на 10k' },
+  { value: '50 000 ₫', color: '#ec4899', warning: false, label: '50k — розовая' },
+  { value: '20 000 ₫', color: '#3b82f6', warning: true, label: '20k — синяя! Осторожно — похожа на 500k' },
+  { value: '10 000 ₫', color: '#8b5cf6', warning: true, label: '10k — фиолетовая! Осторожно — похожа на 100k' },
+];
+
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '000', '0', '⌫'];
 
 export default function Converter() {
   const { c } = useTheme();
+  const { settings } = useAuth();
   const { data: r, updatedAt, offline } = useRates();
   const [from, setFrom] = useState<Cur>('VND');
   const [raw, setRaw] = useState('500000');
@@ -31,10 +43,11 @@ export default function Converter() {
     setRaw(s => (s === '0' ? k.replace(/^0+/, '') || '0' : (s + k).slice(0, 12)));
   };
 
-  // Быстрая смена направления: VND ⇄ RUB (самый частый сценарий)
+  // Быстрая смена направления: VND ⇄ валюта пользователя (по умолчанию RUB)
+  const targetCur: Cur = (settings?.currency as Cur) || 'RUB';
   const swap = () => {
     tap();
-    const to: Cur = from === 'VND' ? 'RUB' : 'VND';
+    const to: Cur = from === 'VND' ? targetCur : 'VND';
     setRaw(String(Math.round(convert(amount, from, to, r))));
     setFrom(to);
   };
@@ -98,6 +111,21 @@ export default function Converter() {
           </Card>
         ) : null
       ) : null}
+
+      {/* Памятка по купюрам */}
+      <Card style={{ gap: 8 }}>
+        <T v="label" style={{ color: c.coral }}>Шпаргалка по купюрам Вьетнама</T>
+        <View style={{ gap: 6 }}>
+          {NOTES.map((n, i) => (
+            <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: n.color }} />
+              <Text style={{ fontFamily: fonts.bodyBold, fontSize: 13, color: n.warning ? c.gold : c.textPrimary, flex: 1 }}>
+                {n.label}
+              </Text>
+            </View>
+          ))}
+        </View>
+      </Card>
 
       {/* Цифровая клавиатура */}
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>

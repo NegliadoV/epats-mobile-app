@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { router } from 'expo-router';
 import { API_BASE } from '@/lib/api';
 import BrandLogo from '@/components/BrandLogo';
+import { useAuth } from '@/lib/auth';
 
 const CITIES = [
   { id: 'danang', name: 'Дананг', flag: '🏖️', desc: 'Пляж + IT хаб', factor: 1.0 },
@@ -124,11 +125,21 @@ const INITIAL_EXPENSES = [
 ];
 
 export default function CalculatorWebScreen() {
+  const { settings, saveSettings } = useAuth();
   const [rates, setRates] = useState({ usdRub: 83.5, usdVnd: 25940 });
-  const [city, setCity] = useState<CityId>('danang');
-  const [life, setLife] = useState<LifeId>('comfort');
-  const [fam, setFam] = useState<FamId>('family');
-  const [cur, setCur] = useState<'usd' | 'rub' | 'vnd'>('usd');
+  const [city, setCity] = useState<CityId>((settings?.city as CityId) || 'danang');
+  const [life, setLife] = useState<LifeId>((settings?.lifestyle as LifeId) || 'comfort');
+  const [fam, setFam] = useState<FamId>((settings?.family as FamId) || 'solo');
+  const [cur, setCur] = useState<'usd' | 'rub' | 'vnd'>(
+    settings?.currency === 'RUB' ? 'rub' : 'usd'
+  );
+
+  useEffect(() => {
+    if (settings?.city) setCity(settings.city as CityId);
+    if (settings?.lifestyle) setLife(settings.lifestyle as LifeId);
+    if (settings?.family) setFam(settings.family as FamId);
+    if (settings?.currency === 'RUB') setCur('rub');
+  }, [settings?.city, settings?.lifestyle, settings?.family, settings?.currency]);
   const [luxuryTweak, setLuxuryTweak] = useState(50);
 
   useEffect(() => {

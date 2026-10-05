@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 
 import { Card, Chip, Screen, T } from '@/components/ui';
+import { useAuth } from '@/lib/auth';
 import { NEIGHBORHOODS, NeighborhoodData } from '@/lib/neighborhoodsData';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fonts, radius, space } from '@/theme/tokens';
@@ -17,7 +18,8 @@ const CITIES = [
 
 export default function NeighborhoodsScreen() {
   const { c } = useTheme();
-  const [selectedCity, setSelectedCity] = useState('all');
+  const { settings } = useAuth();
+  const [selectedCity, setSelectedCity] = useState(settings?.city || 'all');
   const [filterGen, setFilterGen] = useState(false);
   const [filterFiber, setFilterFiber] = useState(false);
 
