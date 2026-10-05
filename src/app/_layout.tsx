@@ -11,7 +11,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Platform } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { AuthProvider } from '@/lib/auth';
+import { AuthProvider, useAuth } from '@/lib/auth';
 import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
 import { fonts } from '@/theme/tokens';
 
@@ -19,8 +19,22 @@ SplashScreen.preventAutoHideAsync();
 
 function RootStack() {
   const { c, theme } = useTheme();
-  useCheckOnboarding();
-  return (
+  const { user, settings, loading } = useAuth();
+
+  useEffect(() => {
+    if (loading) return;
+    // Если пользователь уже авторизован и его критерии есть в БД — онбординг не показываем!
+    if (user && settings?.city) {
+      AsyncStorage.setItem('epats_onboarding_completed_v1', 'true').catch(() => {});
+      return;
+    }
+    AsyncStorage.getItem('epats_onboarding_completed_v1').then(completed => {
+      if (!completed && !(user && settings?.city)) {
+        router.replace('/onboarding');
+      }
+    }).catch(() => {});
+  }, [user, settings?.city, loading]);
+    return (
     <>
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       <Stack
@@ -50,15 +64,7 @@ function RootStack() {
   );
 }
 
-function useCheckOnboarding() {
-  useEffect(() => {
-    AsyncStorage.getItem('epats_onboarding_completed_v1').then(completed => {
-      if (!completed) {
-        router.replace('/onboarding');
-      }
-    }).catch(() => {});
-  }, []);
-}
+
 
 export default function RootLayout() {
   const [loaded] = useFonts({

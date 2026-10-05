@@ -4,7 +4,7 @@ import {
   ArrowLeft, ArrowRight, Check, CheckCircle2, ChevronRight,
   Compass, DollarSign, Globe, MapPin, Plane, Send, ShieldCheck, Sparkles, User
 } from 'lucide-react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   ActivityIndicator, Pressable, ScrollView, Text, TextInput, View
 } from 'react-native';
@@ -54,24 +54,41 @@ const FROM_CURRENCIES: { id: CurrencyId; label: string; flag: string }[] = [
   { id: 'USDT', label: 'USDT / P2P (₮)', flag: '🪙' },
 ];
 
+type StepType = 'auth' | 'city' | 'visa' | 'budget' | 'currency';
+
 export default function OnboardingScreen() {
   const { c } = useTheme();
-  const { user, loginState, login, cancelLogin, saveSettings } = useAuth();
+  const { user, settings, loginState, login, cancelLogin, saveSettings } = useAuth();
 
-  const [step, setStep] = useState<number>(1);
-  const [selectedCity, setSelectedCity] = useState<CityId | 'planning'>('danang');
-  const [selectedVisa, setSelectedVisa] = useState<VisaTypeId | 'tourist' | 'trc' | 'exploring'>('evisa90_single');
+  // Если пользователь авторизован — шаг логина исключается!
+  const steps: StepType[] = user
+    ? ['city', 'visa', 'budget', 'currency']
+    : ['auth', 'city', 'visa', 'budget', 'currency'];
+
+  const [stepIdx, setStepIdx] = useState<number>(0);
+  const [selectedCity, setSelectedCity] = useState<CityId | 'planning'>((settings.city as CityId) || 'danang');
+  const [selectedVisa, setSelectedVisa] = useState<VisaTypeId | 'tourist' | 'trc' | 'exploring'>((settings.visa_type as VisaTypeId) || 'evisa90_single');
   const [touristDays, setTouristDays] = useState<number>(14);
-  const [selectedLifestyle, setSelectedLifestyle] = useState<LifestyleId>('comfort');
-  const [selectedFamily, setSelectedFamily] = useState<FamilyId>('solo');
-  const [fromCurrency, setFromCurrency] = useState<CurrencyId>('RUB');
+  const [selectedLifestyle, setSelectedLifestyle] = useState<LifestyleId>((settings.lifestyle as LifestyleId) || 'comfort');
+  const [selectedFamily, setSelectedFamily] = useState<FamilyId>((settings.family as FamilyId) || 'solo');
+  const [fromCurrency, setFromCurrency] = useState<CurrencyId>((settings.currency as CurrencyId) || 'RUB');
 
-  const totalSteps = 5;
+  // Автоматический переход к шагу города, если пользователь вошел на шаге 1
+  useEffect(() => {
+    if (user && steps[stepIdx] === 'auth') {
+      setStepIdx(0); // первый шаг теперь 'city'
+    }
+  }, [user]);
+
+  const currentStep = steps[stepIdx] || 'city';
+  const totalSteps = steps.length;
+  const isFirstStep = stepIdx === 0;
+  const isLastStep = stepIdx === totalSteps - 1;
 
   const nextStep = () => {
     tap();
-    if (step < totalSteps) {
-      setStep(s => s + 1);
+    if (!isLastStep) {
+      setStepIdx(i => i + 1);
     } else {
       finishOnboarding();
     }
@@ -79,12 +96,11 @@ export default function OnboardingScreen() {
 
   const prevStep = () => {
     tap();
-    if (step > 1) setStep(s => s - 1);
+    if (!isFirstStep) setStepIdx(i => i - 1);
   };
 
   const finishOnboarding = async () => {
     tap();
-    // 1. Формируем и сохраняем критерии в Supabase БД и AsyncStorage
     const city = selectedCity === 'planning' ? 'danang' : selectedCity;
     const visaType = selectedVisa === 'tourist' || selectedVisa === 'exploring' || selectedVisa === 'trc'
       ? '45'
@@ -101,10 +117,7 @@ export default function OnboardingScreen() {
       notify_alerts: true,
     });
 
-    // 2. Помечаем опрос пройденным
     await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
-
-    // 3. Переходим на главный экран
     router.replace('/(tabs)');
   };
 
@@ -123,7 +136,7 @@ export default function OnboardingScreen() {
           {/* Индикатор шага */}
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
             <Text style={{ fontFamily: fonts.bodyBold, fontSize: 12, color: c.textMuted }}>
-              Шаг {step} из {totalSteps}
+              Шаг {stepIdx + 1} из {totalSteps}
             </Text>
             <Pressable onPress={finishOnboarding} hitSlop={10}>
               <Text style={{ fontFamily: fonts.bodySemi, fontSize: 12, color: c.accent }}>
@@ -133,7 +146,7 @@ export default function OnboardingScreen() {
           </View>
         </View>
 
-        {/* Прогресс-бар из 5 делений */}
+        {/* Прогресс-бар */}
         <View style={{ flexDirection: 'row', gap: 4, height: 4 }}>
           {Array.from({ length: totalSteps }).map((_, i) => (
             <View
@@ -141,15 +154,15 @@ export default function OnboardingScreen() {
               style={{
                 flex: 1,
                 borderRadius: 2,
-                backgroundColor: i + 1 <= step ? c.accent : c.bgSecondary,
+                backgroundColor: i <= stepIdx ? c.accent : c.bgSecondary,
               }}
             />
           ))}
         </View>
       </View>
 
-      {/* ШАГ 1: ВХОД ЧЕРЕЗ TELEGRAM */}
-      {step === 1 && (
+      {/* ШАГ: ВХОД ЧЕРЕЗ TELEGRAM (ТОЛЬКО ДЛЯ НЕАВТОРИЗОВАННЫХ) */}
+      {currentStep === 'auth' && (
         <View style={{ gap: space.md, marginTop: space.sm }}>
           <View style={{ gap: 6 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -162,53 +175,38 @@ export default function OnboardingScreen() {
             </T>
           </View>
 
-          {user ? (
-            <Card accent style={{ gap: space.md, alignItems: 'center', paddingVertical: space.xl }}>
-              <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: c.accentGlow, alignItems: 'center', justifyContent: 'center' }}>
-                <CheckCircle2 size={36} color={c.accent} />
-              </View>
-              <View style={{ alignItems: 'center', gap: 4 }}>
-                <T v="h2">Вы авторизованы!</T>
-                <T v="body" style={{ color: c.accent, fontFamily: fonts.bodyHeavy }}>
-                  {user.first_name} {user.last_name ?? ''} {user.username ? `(@${user.username})` : ''}
-                </T>
-                <T v="muted" style={{ textAlign: 'center' }}>Критерии будут синхронизироваться с базой данных epats.io</T>
-              </View>
-            </Card>
-          ) : (
-            <Card accent style={{ gap: space.md, alignItems: 'center', paddingVertical: space.xl }}>
-              <View style={{ width: 60, height: 60, borderRadius: 30, backgroundColor: 'rgba(42,171,238,0.15)', alignItems: 'center', justifyContent: 'center' }}>
-                <Send size={28} color={c.tg} />
-              </View>
-              <View style={{ alignItems: 'center', gap: 4 }}>
-                <T v="h2">Вход через Telegram</T>
-                <T v="muted" style={{ textAlign: 'center', fontSize: 13 }}>
-                  Синхронизирует ваши критерии, сохраненные статьи и напоминания о визе между телефоном и сайтом.
-                </T>
-              </View>
+          <Card accent style={{ gap: space.md, alignItems: 'center', paddingVertical: space.xl }}>
+            <View style={{ width: 60, height: 60, borderRadius: 30, backgroundColor: 'rgba(42,171,238,0.15)', alignItems: 'center', justifyContent: 'center' }}>
+              <Send size={28} color={c.tg} />
+            </View>
+            <View style={{ alignItems: 'center', gap: 4 }}>
+              <T v="h2">Вход через Telegram</T>
+              <T v="muted" style={{ textAlign: 'center', fontSize: 13 }}>
+                Синхронизирует ваши критерии, сохраненные статьи и напоминания о визе между телефоном и сайтом.
+              </T>
+            </View>
 
-              {loginState === 'waiting' ? (
-                <View style={{ alignItems: 'center', gap: 8 }}>
-                  <ActivityIndicator color={c.tg} />
-                  <T v="h3" style={{ textAlign: 'center' }}>Подтвердите вход в Telegram</T>
-                  <T v="muted" style={{ textAlign: 'center' }}>Нажмите «Start» у бота @epatsiobot и вернитесь</T>
-                  <Pressable onPress={cancelLogin}><Text style={{ fontFamily: fonts.bodyBold, color: c.textMuted }}>Отмена</Text></Pressable>
-                </View>
-              ) : (
-                <View style={{ width: '100%', gap: 10 }}>
-                  <GradientButton
-                    kind="tg"
-                    title="Войти через Telegram"
-                    icon={<Send size={18} color="#fff" />}
-                    onPress={login}
-                  />
-                  <T v="muted" style={{ textAlign: 'center', fontSize: 11.5 }}>
-                    Без паролей. Мы не видим ваш номер телефона.
-                  </T>
-                </View>
-              )}
-            </Card>
-          )}
+            {loginState === 'waiting' ? (
+              <View style={{ alignItems: 'center', gap: 8 }}>
+                <ActivityIndicator color={c.tg} />
+                <T v="h3" style={{ textAlign: 'center' }}>Подтвердите вход в Telegram</T>
+                <T v="muted" style={{ textAlign: 'center' }}>Нажмите «Start» у бота @epatsiobot и вернитесь</T>
+                <Pressable onPress={cancelLogin}><Text style={{ fontFamily: fonts.bodyBold, color: c.textMuted }}>Отмена</Text></Pressable>
+              </View>
+            ) : (
+              <View style={{ width: '100%', gap: 10 }}>
+                <GradientButton
+                  kind="tg"
+                  title="Войти через Telegram"
+                  icon={<Send size={18} color="#fff" />}
+                  onPress={login}
+                />
+                <T v="muted" style={{ textAlign: 'center', fontSize: 11.5 }}>
+                  Без паролей. Мы не видим ваш номер телефона.
+                </T>
+              </View>
+            )}
+          </Card>
 
           <Pressable
             onPress={nextStep}
@@ -218,14 +216,14 @@ export default function OnboardingScreen() {
             }}
           >
             <Text style={{ fontFamily: fonts.bodyHeavy, color: '#fff', fontSize: 15 }}>
-              {user ? 'Продолжить к выбору города →' : 'Продолжить без входа (гость) →'}
+              Продолжить без входа (гость) →
             </Text>
           </Pressable>
         </View>
       )}
 
-      {/* ШАГ 2: ГОРОД ВО ВЬЕТНАМЕ */}
-      {step === 2 && (
+      {/* ШАГ: ГОРОД ВО ВЬЕТНАМЕ */}
+      {currentStep === 'city' && (
         <View style={{ gap: space.md, marginTop: space.sm }}>
           <View style={{ gap: 6 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -266,8 +264,8 @@ export default function OnboardingScreen() {
         </View>
       )}
 
-      {/* ШАГ 3: ВИЗА ИЛИ ТУРИСТ */}
-      {step === 3 && (
+      {/* ШАГ: ВИЗА ИЛИ ТУРИСТ */}
+      {currentStep === 'visa' && (
         <View style={{ gap: space.md, marginTop: space.sm }}>
           <View style={{ gap: 6 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -308,7 +306,6 @@ export default function OnboardingScreen() {
             })}
           </View>
 
-          {/* Дополнительный вопрос, если турист */}
           {selectedVisa === 'tourist' && (
             <Card accent style={{ gap: space.sm }}>
               <T v="label" style={{ color: c.coral }}>Сколько дней планируете провести во Вьетнаме?</T>
@@ -332,8 +329,8 @@ export default function OnboardingScreen() {
         </View>
       )}
 
-      {/* ШАГ 4: БЮДЖЕТ И СТИЛЬ ЖИЗНИ */}
-      {step === 4 && (
+      {/* ШАГ: БЮДЖЕТ И СТИЛЬ ЖИЗНИ */}
+      {currentStep === 'budget' && (
         <View style={{ gap: space.md, marginTop: space.sm }}>
           <View style={{ gap: 6 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -377,7 +374,6 @@ export default function OnboardingScreen() {
             })}
           </View>
 
-          {/* Состав семьи */}
           <Card style={{ gap: space.sm }}>
             <T v="label">С кем вы едете?</T>
             <View style={{ flexDirection: 'row', gap: 8 }}>
@@ -394,8 +390,8 @@ export default function OnboardingScreen() {
         </View>
       )}
 
-      {/* ШАГ 5: ВАЛЮТЫ И КОНВЕРТАЦИЯ */}
-      {step === 5 && (
+      {/* ШАГ: ВАЛЮТЫ И КОНВЕРТАЦИЯ */}
+      {currentStep === 'currency' && (
         <View style={{ gap: space.md, marginTop: space.sm }}>
           <View style={{ gap: 6 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -437,7 +433,6 @@ export default function OnboardingScreen() {
             </View>
           </Card>
 
-          {/* Итоговая карточка конвертации */}
           <Card style={{ gap: 8, backgroundColor: 'rgba(31,209,193,0.08)', borderColor: c.accent }}>
             <T v="h3" style={{ color: c.accent }}>Автоматическая пара:</T>
             <Text style={{ fontFamily: fonts.display, fontSize: 20, color: c.textPrimary }}>
@@ -450,30 +445,32 @@ export default function OnboardingScreen() {
         </View>
       )}
 
-      {/* НИЖНЯЯ ПАНЕЛЬ НАВИГАЦИИ */}
-      {step > 1 && (
+      {/* НИЖНЯЯ ПАНЕЛЬ НАВИГАЦИИ (ПОКАЗЫВАЕТСЯ НА ВСЕХ ШАГАХ КРОМЕ ЛОГИНА ДЛЯ ГОСТЯ) */}
+      {(currentStep !== 'auth' || user) && (
         <View style={{ flexDirection: 'row', gap: space.md, marginTop: space.lg, paddingBottom: space.xl }}>
-          <Pressable
-            onPress={prevStep}
-            style={{
-              flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
-              paddingVertical: 14, borderRadius: radius.pill, borderWidth: 1, borderColor: c.border,
-              backgroundColor: c.bgSecondary,
-            }}
-          >
-            <ArrowLeft size={18} color={c.textSecondary} />
-            <Text style={{ fontFamily: fonts.bodyBold, color: c.textSecondary, fontSize: 14 }}>Назад</Text>
-          </Pressable>
+          {!isFirstStep && (
+            <Pressable
+              onPress={prevStep}
+              style={{
+                flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+                paddingVertical: 14, borderRadius: radius.pill, borderWidth: 1, borderColor: c.border,
+                backgroundColor: c.bgSecondary,
+              }}
+            >
+              <ArrowLeft size={18} color={c.textSecondary} />
+              <Text style={{ fontFamily: fonts.bodyBold, color: c.textSecondary, fontSize: 14 }}>Назад</Text>
+            </Pressable>
+          )}
 
           <Pressable
             onPress={nextStep}
             style={{
-              flex: 2, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+              flex: isFirstStep ? 1 : 2, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
               paddingVertical: 14, borderRadius: radius.pill, backgroundColor: c.accent,
             }}
           >
             <Text style={{ fontFamily: fonts.bodyHeavy, color: '#fff', fontSize: 15 }}>
-              {step === totalSteps ? 'Готово, открыть epats.io 🚀' : 'Далее →'}
+              {isLastStep ? 'Готово, открыть epats.io 🚀' : 'Далее →'}
             </Text>
           </Pressable>
         </View>
