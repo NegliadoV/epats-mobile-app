@@ -66,7 +66,6 @@ export async function scheduleVisaReminder(expiryDate: Date, visaType: string = 
             data: { type: 'visa_reminder', visaType },
           },
           trigger: {
-            type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
             seconds: secondsUntil,
             repeats: false,
           },
