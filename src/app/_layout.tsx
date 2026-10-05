@@ -43,7 +43,7 @@ function RootStack() {
           headerTintColor: c.textPrimary,
           headerTitleStyle: { fontFamily: fonts.bodyHeavy },
           headerShadowVisible: false,
-          headerBackTitleVisible: false,
+          headerBackButtonDisplayMode: 'minimal',
           contentStyle: { backgroundColor: c.bgPrimary },
         }}
       >
