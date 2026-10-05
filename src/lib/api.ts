@@ -1,19 +1,33 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
 import * as SecureStore from 'expo-secure-store';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 /* ─── API-клиент к epats.io ─── */
 
-export const API_BASE =
-  process.env.EXPO_PUBLIC_API_BASE ??
-  (typeof window !== 'undefined' &&
-  (window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1' ||
-    window.location.hostname.startsWith('192.168.') ||
-    window.location.hostname.startsWith('10.') ||
-    window.location.hostname.startsWith('172.'))
-    ? `http://${window.location.hostname}:3000`
-    : 'https://epats.vercel.app');
+function resolveApiBase(): string {
+  if (process.env.EXPO_PUBLIC_API_BASE) {
+    return process.env.EXPO_PUBLIC_API_BASE;
+  }
+  // В веб-превью в браузере
+  if (typeof window !== 'undefined' && window.location?.hostname) {
+    const h = window.location.hostname;
+    if (h === 'localhost' || h === '127.0.0.1' || h.startsWith('192.168.') || h.startsWith('10.') || h.startsWith('172.')) {
+      return `http://${h}:3000`;
+    }
+  }
+  // На нативном Android / iOS в Expo Go (автоматически подхватывает IP хост-машины Metro)
+  const hostUri = Constants.expoConfig?.hostUri || (Constants as any).manifest2?.extra?.expoClient?.hostUri;
+  if (hostUri) {
+    const host = hostUri.split(':')[0];
+    if (host && (host.startsWith('192.168.') || host.startsWith('10.') || host.startsWith('172.') || host === 'localhost' || host === '127.0.0.1')) {
+      return `http://${host}:3000`;
+    }
+  }
+  return 'https://epats.vercel.app';
+}
+
+export const API_BASE = resolveApiBase();
 export const WEB_BASE = API_BASE;
 const TOKEN_KEY = 'epats_session';
 
