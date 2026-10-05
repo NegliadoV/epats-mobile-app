@@ -285,7 +285,7 @@ export default function Home() {
       {/* Инструменты */}
       <SectionTitle title="Инструменты" action="Все" onAction={() => router.push('/tools')} />
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-        {TOOLS.slice(0, 6).map(t => (
+        {TOOLS.map(t => (
           <Card key={t.href} onPress={() => openTool(t.href)} style={{ width: '31%', flexGrow: 1, padding: space.md, alignItems: 'flex-start', gap: 8 }}>
             <TropicIcon name={t.icon} size={36} />
             <Text numberOfLines={2} style={{ fontFamily: fonts.bodyBold, fontSize: 12.5, color: c.textPrimary }}>{t.name}</Text>

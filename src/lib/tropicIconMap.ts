@@ -16,6 +16,8 @@ const TOOL_ICONS: Record<string, TropicIconName> = {
   '/tools/checklist': 'checklist',
   '/tools/cities': 'cities',
   '/tools/telegram': 'chat',
+  '/tools/gyms': 'health',
+  '/tools/kids': 'life',
   '/tools/electricity': 'electricity',
 };
 
