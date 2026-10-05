@@ -138,11 +138,6 @@ export default function OnboardingScreen() {
             <Text style={{ fontFamily: fonts.bodyBold, fontSize: 12, color: c.textMuted }}>
               Шаг {stepIdx + 1} из {totalSteps}
             </Text>
-            <Pressable onPress={finishOnboarding} hitSlop={10}>
-              <Text style={{ fontFamily: fonts.bodySemi, fontSize: 12, color: c.accent }}>
-                Пропустить
-              </Text>
-            </Pressable>
           </View>
         </View>
 
