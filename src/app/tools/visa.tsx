@@ -5,7 +5,7 @@ import {
   Info, MapPin, ShieldAlert, Sparkles, AlertTriangle, ArrowRight,
   Clock, DollarSign, FileText, CheckCircle2, AlertCircle, Bell
 } from 'lucide-react-native';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Platform, Pressable, ScrollView, StyleSheet, Text,
   TextInput, TouchableOpacity, View
@@ -13,6 +13,7 @@ import {
 
 import { Card, Chip, Screen, T, tap } from '@/components/ui';
 import { scheduleVisaReminder } from '@/lib/notifications';
+import { useAuth } from '@/lib/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fonts, radius, space } from '@/theme/tokens';
 
@@ -454,12 +455,28 @@ function formatOffsetTime(baseTime: string, addedMinutes: number): string {
 
 export default function VisaToolScreen() {
   const { c } = useTheme();
+  const { settings, saveSettings } = useAuth();
 
   // Режим калькулятора: по дате въезда или дате выезда
   const [calcMode, setCalcMode] = useState<CalcMode>('entry');
-  const [entryDate, setEntryDate] = useState(() => toIsoDate(new Date()));
+  const [entryDate, setEntryDate] = useState(() => settings.entry_date || toIsoDate(new Date()));
   const [exitDate, setExitDate] = useState('');
-  const [visaType, setVisaType] = useState<VisaType>('evisa90_single');
+  const [visaType, setVisaType] = useState<VisaType>((settings.visa_type as VisaType) || 'evisa90_single');
+  const [savedToProfile, setSavedToProfile] = useState(false);
+
+  useEffect(() => {
+    if (settings.entry_date) setEntryDate(settings.entry_date);
+    if (settings.visa_type) setVisaType(settings.visa_type as VisaType);
+  }, [settings.entry_date, settings.visa_type]);
+
+  const handleSaveToProfile = async () => {
+    tap();
+    if (entryDate) {
+      await saveSettings({ entry_date: entryDate, visa_type: visaType });
+      setSavedToProfile(true);
+      setTimeout(() => setSavedToProfile(false), 2500);
+    }
+  };
 
   // Расчет
   const selectedVisaObj = VISA_TYPES.find(v => v.id === visaType)!;

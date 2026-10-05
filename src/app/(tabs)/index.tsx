@@ -1,12 +1,13 @@
 import { router } from 'expo-router';
 import { Moon, Sun, WifiOff } from 'lucide-react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { Sparkline } from '@/components/Sparkline';
 import { Card, Chip, Screen, SectionTitle, T, tap } from '@/components/ui';
 import BrandLogo from '@/components/BrandLogo';
 import { ARTICLES } from '@shared/data/articles';
+import { useAuth } from '@/lib/auth';
 import { useHistory, useRates, useWeather } from '@/lib/data';
 import { nf, timeAgo } from '@/lib/format';
 import { openTool, TOOLS } from '@/lib/tools';
@@ -23,7 +24,9 @@ export default function Home() {
   const rates = useRates();
   const history = useHistory();
   const weather = useWeather();
-  const [city, setCity] = useState('danang');
+  const { settings } = useAuth();
+  const [city, setCity] = useState<string>(settings.city || 'danang');
+  useEffect(() => { if (settings.city) setCity(settings.city); }, [settings.city]);
 
   const r = rates.data;
   const usdtVnd = Math.round(r.usdVnd * (r.usdtRub / r.usdRub));

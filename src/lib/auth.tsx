@@ -4,6 +4,44 @@ import { AppState, Linking } from 'react-native';
 
 import { api, loadToken, saveToken } from './api';
 
+export type CityId = 'danang' | 'nhatrang' | 'hcm' | 'hanoi' | 'phuquoc';
+export type VisaTypeId = '45' | 'evisa90_single' | 'evisa90_multi' | 'phuquoc30';
+export type CurrencyId = 'RUB' | 'USD' | 'USDT';
+export type LifestyleId = 'budget' | 'comfort' | 'premium';
+export type FamilyId = 'solo' | 'couple' | 'family' | 'big_family';
+
+export interface UserSettings {
+  city: CityId | null;
+  visa_type: VisaTypeId | null;
+  entry_date: string | null;
+  departure_date: string | null;
+  currency: CurrencyId | null;
+  lifestyle: LifestyleId | null;
+  family: FamilyId | null;
+  budget_usd: number | null;
+  notify_visa: boolean;
+  notify_departure: boolean;
+  notify_daily: boolean;
+  notify_alerts: boolean;
+}
+
+export type SettingsPatch = Partial<UserSettings>;
+
+export const DEFAULT_SETTINGS: UserSettings = {
+  city: 'danang',
+  visa_type: 'evisa90_single',
+  entry_date: null,
+  departure_date: null,
+  currency: 'RUB',
+  lifestyle: 'comfort',
+  family: 'solo',
+  budget_usd: 1200,
+  notify_visa: true,
+  notify_departure: true,
+  notify_daily: false,
+  notify_alerts: true,
+};
+
 export interface PublicUser {
   id: number;
   first_name: string;
@@ -19,7 +57,7 @@ export interface FavoriteItem {
 
 interface MeResponse {
   user: PublicUser | null;
-  settings: Record<string, unknown>;
+  settings: UserSettings;
   favorites: FavoriteItem[];
   configured: boolean;
 }
@@ -30,6 +68,8 @@ interface AuthCtx {
   loading: boolean;
   user: PublicUser | null;
   me: MeResponse | null;
+  settings: UserSettings;
+  saveSettings: (patch: SettingsPatch) => Promise<boolean>;
   favorites: string[];
   isFavorite: (slug: string) => boolean;
   toggleFavorite: (slug: string) => Promise<boolean>;
@@ -43,22 +83,33 @@ interface AuthCtx {
 const Ctx = createContext<AuthCtx | null>(null);
 const POLL_MS = 2000;
 const FAV_STORAGE_KEY = 'epats_fav_articles';
+const SETTINGS_STORAGE_KEY = 'epats_user_settings_v1';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [me, setMe] = useState<MeResponse | null>(null);
+  const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
   const [localFavs, setLocalFavs] = useState<string[]>([]);
   const [loginState, setLoginState] = useState<LoginState>('idle');
   const loginToken = useRef<string | null>(null);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Load offline local favorites on mount
+  // Load offline local favorites and settings on mount
   useEffect(() => {
-    AsyncStorage.getItem(FAV_STORAGE_KEY).then(raw => {
-      if (raw) {
+    Promise.all([
+      AsyncStorage.getItem(FAV_STORAGE_KEY),
+      AsyncStorage.getItem(SETTINGS_STORAGE_KEY),
+    ]).then(([favRaw, setRaw]) => {
+      if (favRaw) {
         try {
-          const list = JSON.parse(raw);
+          const list = JSON.parse(favRaw);
           if (Array.isArray(list)) setLocalFavs(list);
+        } catch {}
+      }
+      if (setRaw) {
+        try {
+          const parsed = JSON.parse(setRaw);
+          setSettings(prev => ({ ...prev, ...parsed }));
         } catch {}
       }
     }).catch(() => {});
@@ -68,6 +119,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const data = await api<MeResponse>('/api/me');
       setMe(data);
+
+      // Синхронизация избранного с сервером
       if (data.favorites && data.favorites.length > 0) {
         const serverFavSlugs = data.favorites.filter(f => f.kind === 'article').map(f => f.ref);
         setLocalFavs(prev => {
@@ -76,6 +129,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return merged;
         });
       }
+
+      // Синхронизация настроек и критериев с базой данных (Supabase)
+      if (data.settings) {
+        setSettings(prev => {
+          const merged: UserSettings = { ...prev, ...data.settings };
+          AsyncStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(merged)).catch(() => {});
+          return merged;
+        });
+      }
+
       if (!data.user) await saveToken(null);
     } catch {
       // offline - keep existing state
@@ -142,6 +205,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setMe(m => (m ? { ...m, user: null, favorites: [] } : m));
   }, []);
 
+  const saveSettings = useCallback(async (patch: SettingsPatch): Promise<boolean> => {
+    // 1. Оптимистичное сохранение в стейт
+    setSettings(prev => {
+      const next = { ...prev, ...patch };
+      // 2. Сохранение в локальный офлайн-кэш на устройстве
+      AsyncStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(next)).catch(() => {});
+      return next;
+    });
+
+    // 3. Если пользователь вошел — отправляем PATCH в Supabase через API
+    if (me?.user) {
+      try {
+        const res = await api<{ ok: boolean; settings?: UserSettings }>('/api/me/settings', {
+          method: 'PATCH',
+          body: JSON.stringify(patch),
+        });
+        if (res.ok && res.settings) {
+          setSettings(res.settings);
+          AsyncStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(res.settings)).catch(() => {});
+        }
+        return true;
+      } catch (err) {
+        console.warn('[auth] settings sync to DB failed, kept offline', err);
+        return false;
+      }
+    }
+    return true;
+  }, [me?.user]);
+
   const isFavorite = useCallback((slug: string) => {
     return localFavs.includes(slug);
   }, [localFavs]);
@@ -170,6 +262,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       user: me?.user ?? null,
       me,
+      settings,
+      saveSettings,
       favorites: localFavs,
       isFavorite,
       toggleFavorite,

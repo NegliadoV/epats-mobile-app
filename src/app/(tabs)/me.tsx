@@ -1,20 +1,21 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { Heart, LogOut, Send, Star, Trash2 } from 'lucide-react-native';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, Text, View } from 'react-native';
+import {
+  Bell, Check, ChevronRight, Clock, Heart, LogOut,
+  Send, ShieldCheck, Star, Trash2, Calendar, AlertCircle
+} from 'lucide-react-native';
+import { useMemo, useState } from 'react';
+import { ActivityIndicator, Alert, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
 import { Card, Chip, GradientButton, Screen, T, tap } from '@/components/ui';
 import BrandLogo from '@/components/BrandLogo';
 import { WEB_BASE } from '@/lib/api';
-import { useAuth } from '@/lib/auth';
+import { useAuth, CityId, VisaTypeId, CurrencyId, LifestyleId, FamilyId } from '@/lib/auth';
 import { getArticleBySlug } from '@shared/data/articles';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fonts, radius, space } from '@/theme/tokens';
 
-const USER_CITY_KEY = 'epats_user_city_v1';
-const CITIES = [
+const CITIES: { id: CityId; name: string }[] = [
   { id: 'danang', name: '🏖️ Дананг' },
   { id: 'nhatrang', name: '🌊 Нячанг' },
   { id: 'hcm', name: '🌆 Хошимин' },
@@ -22,21 +23,80 @@ const CITIES = [
   { id: 'phuquoc', name: '🏝️ Фукуок' },
 ];
 
+const VISAS: { id: VisaTypeId; name: string; days: number }[] = [
+  { id: '45', name: '45 дней (Безвиз)', days: 45 },
+  { id: 'evisa90_single', name: 'E-Visa 90 дней (1-кратная)', days: 90 },
+  { id: 'evisa90_multi', name: 'E-Visa 90 дней (Multi)', days: 90 },
+  { id: 'phuquoc30', name: 'Фукуок 30 дней', days: 30 },
+];
+
+const CURRENCIES: { id: CurrencyId; label: string }[] = [
+  { id: 'RUB', label: '₽ Рубли' },
+  { id: 'USD', label: '$ USD' },
+  { id: 'USDT', label: '₮ USDT' },
+];
+
+const LIFESTYLES: { id: LifestyleId; label: string }[] = [
+  { id: 'budget', label: '🎒 Эконом' },
+  { id: 'comfort', label: '🛋️ Комфорт' },
+  { id: 'premium', label: '💎 Премиум' },
+];
+
+const FAMILIES: { id: FamilyId; label: string }[] = [
+  { id: 'solo', label: '👤 Один' },
+  { id: 'couple', label: '👫 Пара' },
+  { id: 'family', label: '👨‍👩‍👧 Семья' },
+];
+
 export default function MeScreen() {
   const { c } = useTheme();
-  const { loading, user, favorites, toggleFavorite, loginState, login, cancelLogin, logout } = useAuth();
-  const [selectedCity, setSelectedCity] = useState('danang');
+  const { loading, user, settings, saveSettings, favorites, toggleFavorite, loginState, login, cancelLogin, logout } = useAuth();
+  const [entryInput, setEntryInput] = useState(settings.entry_date || '');
+  const [savingMsg, setSavingMsg] = useState(false);
 
-  useEffect(() => {
-    AsyncStorage.getItem(USER_CITY_KEY).then(val => {
-      if (val) setSelectedCity(val);
-    }).catch(() => {});
-  }, []);
+  // Расчет статуса визы
+  const visaStatus = useMemo(() => {
+    if (!settings.entry_date) return null;
+    const entry = new Date(settings.entry_date);
+    if (isNaN(entry.getTime())) return null;
 
-  const handleCityChange = (cityId: string) => {
+    const opt = VISAS.find(v => v.id === settings.visa_type) || VISAS[1];
+    const deadline = new Date(entry);
+    deadline.setDate(deadline.getDate() + opt.days - 1);
+
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const daysLeft = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+    return {
+      entry,
+      deadline,
+      daysLeft,
+      visaName: opt.name,
+      deadlineStr: deadline.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }),
+    };
+  }, [settings.entry_date, settings.visa_type]);
+
+  const handleSaveEntryDate = () => {
     tap();
-    setSelectedCity(cityId);
-    AsyncStorage.setItem(USER_CITY_KEY, cityId).catch(() => {});
+    const val = entryInput.trim();
+    if (!val || /^\d{4}-\d{2}-\d{2}$/.test(val)) {
+      saveSettings({ entry_date: val || null });
+      setSavingMsg(true);
+      setTimeout(() => setSavingMsg(false), 2000);
+    } else {
+      Alert.alert('Неверный формат даты', 'Используйте формат ГГГГ-ММ-ДД (например: 2026-03-15)');
+    }
+  };
+
+  const setTodayEntry = () => {
+    tap();
+    const now = new Date();
+    const iso = now.toISOString().slice(0, 10);
+    setEntryInput(iso);
+    saveSettings({ entry_date: iso });
+    setSavingMsg(true);
+    setTimeout(() => setSavingMsg(false), 2000);
   };
 
   if (loading) {
@@ -49,30 +109,51 @@ export default function MeScreen() {
 
   return (
     <Screen>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-        <BrandLogo size={28} />
-        <Text style={{ fontFamily: fonts.display, fontSize: 18, color: c.textPrimary }}>
-          epats<Text style={{ color: c.coral }}>.io</Text>
-        </Text>
+      {/* Шапка бренда */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          <BrandLogo size={28} />
+          <Text style={{ fontFamily: fonts.display, fontSize: 18, color: c.textPrimary }}>
+            epats<Text style={{ color: c.coral }}>.io</Text>
+          </Text>
+        </View>
+
+        {/* Статус синхронизации с базой */}
+        <View style={{
+          flexDirection: 'row', alignItems: 'center', gap: 5,
+          paddingVertical: 4, paddingHorizontal: 9, borderRadius: radius.pill,
+          backgroundColor: user ? 'rgba(31,209,193,0.12)' : 'rgba(255,255,255,0.06)',
+          borderWidth: 1, borderColor: user ? c.accent : c.border,
+        }}>
+          <ShieldCheck size={13} color={user ? c.accent : c.textMuted} />
+          <Text style={{ fontFamily: fonts.bodyBold, fontSize: 11, color: user ? c.accent : c.textMuted }}>
+            {user ? 'БД синхронизирована' : 'Локальное хранилище'}
+          </Text>
+        </View>
       </View>
 
-      {/* Пользователь / Вход */}
+      {/* Пользователь / Авторизация */}
       {user ? (
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
-          <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: c.accentGlow, alignItems: 'center', justifyContent: 'center' }}>
+        <Card accent style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+          <View style={{ width: 54, height: 54, borderRadius: 27, backgroundColor: c.accentGlow, alignItems: 'center', justifyContent: 'center' }}>
             <Text style={{ fontFamily: fonts.display, fontSize: 22, color: c.accent }}>{user.first_name.slice(0, 1)}</Text>
           </View>
-          <View style={{ flex: 1 }}>
+          <View style={{ flex: 1, gap: 2 }}>
             <T v="h2">{user.first_name} {user.last_name ?? ''}</T>
             {user.username && <T v="muted">@{user.username}</T>}
+            <Text style={{ fontFamily: fonts.bodySemi, color: c.accent, fontSize: 11 }}>
+              Критерии сохранены в Supabase DB
+            </Text>
           </View>
-        </View>
+        </Card>
       ) : (
-        <Card accent style={{ gap: space.md, alignItems: 'center', paddingVertical: space.xl }}>
-          <Text style={{ fontSize: 44 }}>🌴</Text>
+        <Card accent style={{ gap: space.md, alignItems: 'center', paddingVertical: space.lg }}>
+          <Text style={{ fontSize: 40 }}>🌴</Text>
           <View style={{ gap: 4, alignItems: 'center' }}>
             <T v="h2">Синхронизация профиля</T>
-            <T v="muted" style={{ textAlign: 'center' }}>Войдите через Telegram, чтобы синхронизировать избранное и визу с сайтом epats.io</T>
+            <T v="muted" style={{ textAlign: 'center', fontSize: 13 }}>
+              Войдите через Telegram — город, виза, даты и избранное синхронизируются с сервером и базой данных epats.io.
+            </T>
           </View>
           {loginState === 'waiting' ? (
             <>
@@ -85,29 +166,218 @@ export default function MeScreen() {
             <>
               <GradientButton kind="tg" title="Войти через Telegram" icon={<Send size={18} color="#fff" />} onPress={login} style={{ alignSelf: 'stretch' }} />
               {loginState === 'error' && <T v="muted" style={{ color: c.danger }}>Не получилось — попробуйте ещё раз</T>}
-              <T v="muted" style={{ textAlign: 'center', fontSize: 11.5 }}>Без паролей. Мы не видим ваш номер телефона.</T>
+              <T v="muted" style={{ textAlign: 'center', fontSize: 11 }}>Без паролей. Номер телефона остаётся скрытым.</T>
             </>
           )}
         </Card>
       )}
 
-      {/* Мой город во Вьетнаме */}
+      {/* 1. ВИЗОВЫЙ СТАТУС И ТРЕКЕР */}
+      <Card style={{ gap: space.md }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Clock size={18} color={c.coral} />
+            <T v="h3">Моя виза и даты</T>
+          </View>
+          {visaStatus && (
+            <View style={{
+              paddingVertical: 3, paddingHorizontal: 8, borderRadius: radius.pill,
+              backgroundColor: visaStatus.daysLeft > 14 ? 'rgba(31,209,193,0.15)' : visaStatus.daysLeft > 3 ? 'rgba(245,158,11,0.15)' : 'rgba(255,107,74,0.15)',
+            }}>
+              <Text style={{
+                fontFamily: fonts.bodyHeavy, fontSize: 11,
+                color: visaStatus.daysLeft > 14 ? c.accent : visaStatus.daysLeft > 3 ? c.gold : c.coral,
+              }}>
+                {visaStatus.daysLeft > 0 ? `Осталось ${visaStatus.daysLeft} дн.` : 'Виза истекла!'}
+              </Text>
+            </View>
+          )}
+        </View>
+
+        {/* Выбор типа визы */}
+        <View style={{ gap: 6 }}>
+          <T v="label">Тип визы</T>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }}>
+            {VISAS.map(v => (
+              <Chip
+                key={v.id}
+                label={v.name}
+                active={settings.visa_type === v.id}
+                onPress={() => { tap(); saveSettings({ visa_type: v.id }); }}
+              />
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* Дата въезда */}
+        <View style={{ gap: 6 }}>
+          <T v="label">Дата въезда во Вьетнам (ГГГГ-ММ-ДД)</T>
+          <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+            <TextInput
+              value={entryInput}
+              onChangeText={setEntryInput}
+              placeholder="Например: 2026-03-01"
+              placeholderTextColor={c.textMuted}
+              style={{
+                flex: 1, backgroundColor: c.bgSecondary, borderRadius: radius.md,
+                borderWidth: 1, borderColor: c.border, padding: 10,
+                color: c.textPrimary, fontFamily: fonts.bodyHeavy, fontSize: 15,
+              }}
+            />
+            <Pressable
+              onPress={setTodayEntry}
+              style={{ paddingVertical: 10, paddingHorizontal: 12, backgroundColor: c.bgSecondary, borderRadius: radius.md, borderWidth: 1, borderColor: c.border }}
+            >
+              <Text style={{ fontFamily: fonts.bodyBold, color: c.accent, fontSize: 12 }}>Сегодня</Text>
+            </Pressable>
+            <Pressable
+              onPress={handleSaveEntryDate}
+              style={{ paddingVertical: 10, paddingHorizontal: 14, backgroundColor: c.accent, borderRadius: radius.md }}
+            >
+              <Text style={{ fontFamily: fonts.bodyHeavy, color: '#fff', fontSize: 13 }}>OK</Text>
+            </Pressable>
+          </View>
+        </View>
+
+        {/* Результат расчета дедлайна */}
+        {visaStatus ? (
+          <View style={{ padding: 12, borderRadius: radius.md, backgroundColor: c.bgSecondary, gap: 4 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <T v="muted">Крайний срок выезда:</T>
+              <Text style={{ fontFamily: fonts.bodyHeavy, color: c.textPrimary, fontSize: 14 }}>
+                {visaStatus.deadlineStr}
+              </Text>
+            </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
+              <T v="muted">Рекомендация:</T>
+              <Text style={{ fontFamily: fonts.bodySemi, color: c.coral, fontSize: 12 }}>
+                {visaStatus.daysLeft > 14 ? 'Сроки в норме' : 'Пора планировать визаран'}
+              </Text>
+            </View>
+          </View>
+        ) : (
+          <T v="muted" style={{ fontSize: 12 }}>Укажите дату въезда, чтобы приложение рассчитало дедлайн и напомнило о визаране.</T>
+        )}
+
+        <Pressable
+          onPress={() => router.push('/tools/visa')}
+          style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 4 }}
+        >
+          <Text style={{ fontFamily: fonts.bodyBold, color: c.accent, fontSize: 13 }}>
+            Открыть полный калькулятор визарана →
+          </Text>
+          <ChevronRight size={16} color={c.accent} />
+        </Pressable>
+      </Card>
+
+      {/* 2. МОЙ ГОРОД ПРОЖИВАНИЯ */}
       <Card style={{ gap: space.sm }}>
         <T v="h3">📍 Мой город во Вьетнаме</T>
-        <T v="muted">Используется для быстрых подсказок по погоде и аренде</T>
+        <T v="muted">Под этот город открываются прогноз погоды, карта районов и калькулятор цен</T>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
           {CITIES.map(ct => (
             <Chip
               key={ct.id}
               label={ct.name}
-              active={selectedCity === ct.id}
-              onPress={() => handleCityChange(ct.id)}
+              active={settings.city === ct.id}
+              onPress={() => { tap(); saveSettings({ city: ct.id }); }}
             />
           ))}
         </View>
       </Card>
 
-      {/* Избранное (работает и офлайн, и с сервером) */}
+      {/* 3. ФИНАНСЫ И СТИЛЬ ЖИЗНИ */}
+      <Card style={{ gap: space.md }}>
+        <T v="h3">💰 Финансовые критерии</T>
+
+        <View style={{ gap: 6 }}>
+          <T v="label">Основная валюта</T>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            {CURRENCIES.map(cu => (
+              <Chip
+                key={cu.id}
+                label={cu.label}
+                active={settings.currency === cu.id}
+                onPress={() => { tap(); saveSettings({ currency: cu.id }); }}
+              />
+            ))}
+          </View>
+        </View>
+
+        <View style={{ gap: 6 }}>
+          <T v="label">Стиль жизни</T>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            {LIFESTYLES.map(lf => (
+              <Chip
+                key={lf.id}
+                label={lf.label}
+                active={settings.lifestyle === lf.id}
+                onPress={() => { tap(); saveSettings({ lifestyle: lf.id }); }}
+              />
+            ))}
+          </View>
+        </View>
+
+        <View style={{ gap: 6 }}>
+          <T v="label">Состав</T>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            {FAMILIES.map(fm => (
+              <Chip
+                key={fm.id}
+                label={fm.label}
+                active={settings.family === fm.id}
+                onPress={() => { tap(); saveSettings({ family: fm.id }); }}
+              />
+            ))}
+          </View>
+        </View>
+      </Card>
+
+      {/* 4. УВЕДОМЛЕНИЯ */}
+      <Card style={{ gap: space.md }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <Bell size={18} color={c.gold} />
+          <T v="h3">Уведомления</T>
+        </View>
+
+        <Pressable
+          onPress={() => { tap(); saveSettings({ notify_visa: !settings.notify_visa }); }}
+          style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
+        >
+          <View style={{ flex: 1, paddingRight: 10 }}>
+            <Text style={{ fontFamily: fonts.bodyHeavy, color: c.textPrimary, fontSize: 14 }}>Напоминать о визе</Text>
+            <T v="muted" style={{ fontSize: 12 }}>Уведомления за 14, 7 и 3 дня до дедлайна</T>
+          </View>
+          <View style={{
+            width: 44, height: 26, borderRadius: 13,
+            backgroundColor: settings.notify_visa ? c.accent : c.border,
+            alignItems: settings.notify_visa ? 'flex-end' : 'flex-start',
+            padding: 3,
+          }}>
+            <View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: '#fff' }} />
+          </View>
+        </Pressable>
+
+        <Pressable
+          onPress={() => { tap(); saveSettings({ notify_alerts: !settings.notify_alerts }); }}
+          style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
+        >
+          <View style={{ flex: 1, paddingRight: 10 }}>
+            <Text style={{ fontFamily: fonts.bodyHeavy, color: c.textPrimary, fontSize: 14 }}>Штормы и тайфуны</Text>
+            <T v="muted" style={{ fontSize: 12 }}>Экстренные сводки GDACS по прибрежным городам</T>
+          </View>
+          <View style={{
+            width: 44, height: 26, borderRadius: 13,
+            backgroundColor: settings.notify_alerts ? c.accent : c.border,
+            alignItems: settings.notify_alerts ? 'flex-end' : 'flex-start',
+            padding: 3,
+          }}>
+            <View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: '#fff' }} />
+          </View>
+        </Pressable>
+      </Card>
+
+      {/* 5. ИЗБРАННОЕ */}
       <Card style={{ gap: space.md }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>

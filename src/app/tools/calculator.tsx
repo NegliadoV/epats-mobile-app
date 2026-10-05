@@ -1,14 +1,12 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState, useMemo, useEffect } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { Card, Chip, Screen, T, tap } from '@/components/ui';
+import { useAuth, CityId, LifestyleId, FamilyId, CurrencyId } from '@/lib/auth';
 import { useRates, Cur } from '@/lib/data';
 import { nf, money } from '@/lib/format';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fonts, radius, space } from '@/theme/tokens';
-
-const STORAGE_KEY = 'epats_calc_prefs_v1';
 
 const CITIES = [
   { id: 'danang', name: 'Дананг', flag: '🏖️', factor: 1.0 },
@@ -18,23 +16,17 @@ const CITIES = [
   { id: 'phuquoc', name: 'Фукуок', flag: '🏝️', factor: 1.18 },
 ] as const;
 
-type CityId = typeof CITIES[number]['id'];
-
 const LIFESTYLES = [
   { id: 'budget', name: 'Эконом', icon: '🎒', factor: 0.72, desc: 'Студия, рынки, без излишеств' },
   { id: 'comfort', name: 'Комфорт', icon: '🛋️', factor: 1.0, desc: 'Кондо с бассейном, кафе, Grab' },
   { id: 'premium', name: 'Премиум', icon: '💎', factor: 1.65, desc: 'Вилла / пентхаус, рестораны' },
 ] as const;
 
-type LifeId = typeof LIFESTYLES[number]['id'];
-
 const FAMILY_OPTIONS = [
   { id: 'solo', name: 'Один', icon: '👤', mults: { rent: 1.0, food: 1.0, transport: 1.0, visa: 1.0, other: 1.0 } },
   { id: 'couple', name: 'Пара', icon: '👫', mults: { rent: 1.15, food: 1.7, transport: 1.4, visa: 2.0, other: 1.6 } },
   { id: 'family', name: 'Семья', icon: '👨‍👩‍👧', mults: { rent: 1.35, food: 2.1, transport: 1.6, visa: 2.8, other: 2.1 } },
 ] as const;
-
-type FamId = typeof FAMILY_OPTIONS[number]['id'];
 
 const BASE_ITEMS = [
   { key: 'rent', name: 'Жильё и коммуналка', emoji: '🏠', baseVnd: 10_000_000, type: 'rent' },
@@ -48,51 +40,44 @@ const BASE_ITEMS = [
 export default function BudgetCalculator() {
   const { c } = useTheme();
   const { data: r } = useRates();
-  const [cityId, setCityId] = useState<CityId>('danang');
-  const [lifeId, setLifeId] = useState<LifeId>('comfort');
-  const [famId, setFamId] = useState<FamId>('solo');
-  const [cur, setCur] = useState<Cur>('VND');
+  const { settings, saveSettings } = useAuth();
+
+  const [cityId, setCityId] = useState<CityId>((settings.city as CityId) || 'danang');
+  const [lifeId, setLifeId] = useState<LifestyleId>((settings.lifestyle as LifestyleId) || 'comfort');
+  const [famId, setFamId] = useState<FamilyId>((settings.family as FamilyId) || 'solo');
+  const [cur, setCur] = useState<Cur>((settings.currency as Cur) || 'RUB');
 
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY).then(raw => {
-      if (raw) {
-        try {
-          const d = JSON.parse(raw);
-          if (d.cityId) setCityId(d.cityId);
-          if (d.lifeId) setLifeId(d.lifeId);
-          if (d.famId) setFamId(d.famId);
-          if (d.cur) setCur(d.cur);
-        } catch {}
-      }
-    }).catch(() => {});
-  }, []);
-
-  const savePrefs = (cId: CityId, lId: LifeId, fId: FamId, cu: Cur) => {
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ cityId: cId, lifeId: lId, famId: fId, cur: cu })).catch(() => {});
-  };
+    if (settings.city) setCityId(settings.city as CityId);
+    if (settings.lifestyle) setLifeId(settings.lifestyle as LifestyleId);
+    if (settings.family) setFamId(settings.family as FamilyId);
+    if (settings.currency) setCur(settings.currency as Cur);
+  }, [settings.city, settings.lifestyle, settings.family, settings.currency]);
 
   const handleCity = (id: CityId) => {
     tap();
     setCityId(id);
-    savePrefs(id, lifeId, famId, cur);
+    saveSettings({ city: id });
   };
 
-  const handleLife = (id: LifeId) => {
+  const handleLife = (id: LifestyleId) => {
     tap();
     setLifeId(id);
-    savePrefs(cityId, id, famId, cur);
+    saveSettings({ lifestyle: id });
   };
 
-  const handleFam = (id: FamId) => {
+  const handleFam = (id: FamilyId) => {
     tap();
     setFamId(id);
-    savePrefs(cityId, lifeId, id, cur);
+    saveSettings({ family: id });
   };
 
   const handleCur = (id: Cur) => {
     tap();
     setCur(id);
-    savePrefs(cityId, lifeId, famId, id);
+    if (id === 'RUB' || id === 'USD' || id === 'USDT') {
+      saveSettings({ currency: id });
+    }
   };
 
   const city = CITIES.find(x => x.id === cityId) || CITIES[0];
@@ -121,7 +106,7 @@ export default function BudgetCalculator() {
     <Screen padTop={false}>
       <View style={{ gap: 6 }}>
         <T v="h1">Калькулятор бюджета</T>
-        <T v="body">Реальные расходы на жизнь во Вьетнаме на 2026 год</T>
+        <T v="body">Критерии синхронизируются с вашим профилем и базой данных</T>
       </View>
 
       {/* Город */}
@@ -184,7 +169,7 @@ export default function BudgetCalculator() {
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
           <T v="label" style={{ color: c.accent }}>Итого в месяц</T>
           <View style={{ flexDirection: 'row', gap: 6 }}>
-            {(['VND', 'RUB', 'USD'] as Cur[]).map(cu => (
+            {(['VND', 'RUB', 'USD', 'USDT'] as Cur[]).map(cu => (
               <Chip key={cu} label={cu} active={cur === cu} onPress={() => handleCur(cu)} />
             ))}
           </View>
