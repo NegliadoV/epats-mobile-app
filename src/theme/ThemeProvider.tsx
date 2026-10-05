@@ -14,9 +14,8 @@ const Ctx = createContext<ThemeCtx | null>(null);
 const KEY = 'epats_theme';
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const system = useColorScheme();
-  // Как на сайте: по умолчанию тёмная тема, если пользователь не выбрал иное
-  const [theme, setTheme] = useState<ThemeName>(system === 'light' ? 'light' : 'dark');
+  // Основная тема по умолчанию — тёмная. Светлая только если пользователь сам выбрал в настройках
+  const [theme, setTheme] = useState<ThemeName>('dark');
 
   useEffect(() => {
     AsyncStorage.getItem(KEY).then(v => {
