@@ -54,7 +54,7 @@ export default function Home() {
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
           <BrandLogo size={32} />
           <Text style={{ fontFamily: fonts.display, fontSize: 20, color: c.textPrimary }}>
-            epats<Text style={{ color: c.coral }}>.io</Text>
+            epats<Text style={{ color: c.coral }}>.wiki</Text>
           </Text>
         </View>
         <Pressable
@@ -69,6 +69,45 @@ export default function Home() {
       <View style={{ gap: 6 }}>
         <T v="label" style={{ color: c.coral }}>Вьетнам для своих · 2026</T>
         <T v="h1">Курсы, погода и всё для жизни во Вьетнаме</T>
+      </View>
+
+      {/* ─── Быстрый скролл сервисов (влево-вправо) ─── */}
+      <View style={{ gap: 8 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <T v="label" style={{ color: c.accent, letterSpacing: 0.5 }}>⚡ Быстрый доступ к сервисам</T>
+          <Pressable onPress={() => { tap(); router.push('/tools'); }}>
+            <Text style={{ fontFamily: fonts.bodyBold, fontSize: 12, color: c.coral }}>Все 11 сервисов →</Text>
+          </Pressable>
+        </View>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ gap: 8, paddingVertical: 2 }}
+        >
+          {TOOLS.map(t => (
+            <Pressable
+              key={t.href}
+              onPress={() => { tap(); openTool(t.href); }}
+              style={({ pressed }) => ({
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 8,
+                paddingVertical: 8,
+                paddingHorizontal: 12,
+                borderRadius: radius.pill,
+                backgroundColor: pressed ? c.bgCardHover : c.bgSecondary,
+                borderWidth: 1,
+                borderColor: c.border,
+              })}
+            >
+              <TropicIcon name={t.icon} size={22} />
+              <Text style={{ fontFamily: fonts.bodyBold, fontSize: 12.5, color: c.textPrimary }}>
+                {t.name}
+              </Text>
+            </Pressable>
+          ))}
+        </ScrollView>
       </View>
 
       {/* Тропическая ретро-иллюстрация */}

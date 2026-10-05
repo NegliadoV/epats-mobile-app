@@ -59,6 +59,8 @@ function RootStack() {
         <Stack.Screen name="tools/visa" options={{ title: 'Визаран и калькулятор' }} />
         <Stack.Screen name="tools/weather" options={{ title: 'Погода & Радар' }} />
         <Stack.Screen name="tools/neighborhoods" options={{ title: 'Карта жилья' }} />
+        <Stack.Screen name="tools/gyms" options={{ title: 'Тренажерные залы' }} />
+        <Stack.Screen name="tools/kids" options={{ title: 'Детский Дананг' }} />
       </Stack>
     </>
   );
