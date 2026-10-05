@@ -1,12 +1,15 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Copy, Check, Zap, AlertTriangle } from 'lucide-react-native';
-import { useState, useMemo } from 'react';
-import { Pressable, Text, TextInput, View, Alert } from 'react-native';
+import { useState, useMemo, useEffect } from 'react';
+import { Pressable, Text, TextInput, View } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 
 import { Card, Chip, Screen, T, tap } from '@/components/ui';
 import { nf } from '@/lib/format';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fonts, radius, space } from '@/theme/tokens';
+
+const STORAGE_KEY = 'epats_meter_readings_v1';
 
 const EVN_TIERS = [
   { tier: 1, name: 'Bậc 1', range: '0 – 50 kWh', max: 50, rate: 1893 },
@@ -26,6 +29,40 @@ export default function ElectricityCalculator() {
   const [landlordRate, setLandlordRate] = useState<number>(4000);
   const [copied, setCopied] = useState(false);
   const [lang, setLang] = useState<'vi' | 'en'>('vi');
+
+  // Load saved readings on mount
+  useEffect(() => {
+    AsyncStorage.getItem(STORAGE_KEY).then(raw => {
+      if (raw) {
+        try {
+          const data = JSON.parse(raw);
+          if (data.prev) setPrevMeter(String(data.prev));
+          if (data.curr) setCurrMeter(String(data.curr));
+          if (data.rate) setLandlordRate(Number(data.rate));
+        } catch {}
+      }
+    }).catch(() => {});
+  }, []);
+
+  const saveReadings = (p: string, c: string, r: number) => {
+    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ prev: p, curr: c, rate: r })).catch(() => {});
+  };
+
+  const handlePrevChange = (val: string) => {
+    setPrevMeter(val);
+    saveReadings(val, currMeter, landlordRate);
+  };
+
+  const handleCurrChange = (val: string) => {
+    setCurrMeter(val);
+    saveReadings(prevMeter, val, landlordRate);
+  };
+
+  const handleRateChange = (r: number) => {
+    tap();
+    setLandlordRate(r);
+    saveReadings(prevMeter, currMeter, r);
+  };
 
   const prev = Math.max(0, parseInt(prevMeter) || 0);
   const curr = Math.max(prev, parseInt(currMeter) || 0);
@@ -51,29 +88,8 @@ export default function ElectricityCalculator() {
   const overpayPct = totalEvn > 0 ? Math.round((overpayVnd / totalEvn) * 100) : 0;
 
   const landlordMessage = lang === 'vi'
-    ? `Chào anh/chị chủ nhà,
-Em xin gửi chỉ số điện tháng này:
-• Chỉ số cũ: ${nf(prev)} kWh
-• Chỉ số mới: ${nf(curr)} kWh
-• Tiêu thụ: ${nf(totalKwh)} kWh
-
-Theo biểu giá điện sinh hoạt 6 bậc chính thức của EVN (đã gồm 8% VAT):
-👉 Tổng tiền điện EVN thực tế: ${nf(totalEvn)} ₫ (trung bình ~${nf(avgEvnRate)} ₫/kWh)
-👉 Số tiền theo giá ${nf(landlordRate)} ₫/kWh: ${nf(landlordTotal)} ₫
-(Khoản chênh lệch: +${nf(overpayVnd)} ₫)
-
-Theo Nghị định 134/2013/NĐ-CP, người thuê trọ được áp dụng đúng biểu giá điện sinh hoạt của EVN. Em xin gửi để anh/chị đối chiếu hóa đơn từ Điện Lực. Em cảm ơn anh/chị!`
-    : `Hello! Here is the electricity meter check for this month:
-• Previous meter: ${nf(prev)} kWh
-• Current meter: ${nf(curr)} kWh
-• Total consumption: ${nf(totalKwh)} kWh
-
-According to the official government EVN progressive 6-tier residential tariff (including 8% VAT):
-👉 Official EVN bill: ${nf(totalEvn)} VND (average ~${nf(avgEvnRate)} VND/kWh)
-👉 Flat bill at ${nf(landlordRate)} VND/kWh: ${nf(landlordTotal)} VND
-(Difference / Overpayment: +${nf(overpayVnd)} VND)
-
-Could we please align the payment with the actual official EVN invoice? Thank you!`;
+    ? `Chào anh/chị chủ nhà,\nEm xin gửi chỉ số điện tháng này:\n• Chỉ số cũ: ${nf(prev)} kWh\n• Chỉ số mới: ${nf(curr)} kWh\n• Tiêu thụ: ${nf(totalKwh)} kWh\n\nTheo biểu giá điện sinh hoạt 6 bậc chính thức của EVN (đã gồm 8% VAT):\n👉 Tổng tiền điện EVN thực tế: ${nf(totalEvn)} ₫ (trung bình ~${nf(avgEvnRate)} ₫/kWh)\n👉 Số tiền theo giá ${nf(landlordRate)} ₫/kWh: ${nf(landlordTotal)} ₫\n(Khoản chênh lệch: +${nf(overpayVnd)} ₫)\n\nTheo Nghị định 134/2013/NĐ-CP, người thuê trọ được áp dụng đúng biểu giá điện sinh hoạt của EVN. Em xin gửi để anh/chị đối chiếu hóa đơn từ Điện Lực. Em cảm ơn anh/chị!`
+    : `Hello! Here is the electricity meter check for this month:\n• Previous meter: ${nf(prev)} kWh\n• Current meter: ${nf(curr)} kWh\n• Total consumption: ${nf(totalKwh)} kWh\n\nAccording to the official government EVN progressive 6-tier residential tariff (including 8% VAT):\n👉 Official EVN bill: ${nf(totalEvn)} VND (average ~${nf(avgEvnRate)} VND/kWh)\n👉 Flat bill at ${nf(landlordRate)} VND/kWh: ${nf(landlordTotal)} VND\n(Difference / Overpayment: +${nf(overpayVnd)} VND)\n\nCould we please align the payment with the actual official EVN invoice? Thank you!`;
 
   const copy = async () => {
     tap();
@@ -102,7 +118,7 @@ Could we please align the payment with the actual official EVN invoice? Thank yo
             <TextInput
               keyboardType="number-pad"
               value={prevMeter}
-              onChangeText={setPrevMeter}
+              onChangeText={handlePrevChange}
               placeholder="1240"
               placeholderTextColor={c.textMuted}
               style={{
@@ -122,7 +138,7 @@ Could we please align the payment with the actual official EVN invoice? Thank yo
             <TextInput
               keyboardType="number-pad"
               value={currMeter}
-              onChangeText={setCurrMeter}
+              onChangeText={handleCurrChange}
               placeholder="1620"
               placeholderTextColor={c.textMuted}
               style={{
@@ -154,7 +170,7 @@ Could we please align the payment with the actual official EVN invoice? Thank yo
               key={rate}
               label={`${nf(rate)} ₫`}
               active={landlordRate === rate}
-              onPress={() => setLandlordRate(rate)}
+              onPress={() => handleRateChange(rate)}
             />
           ))}
         </View>

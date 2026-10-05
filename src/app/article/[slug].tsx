@@ -1,10 +1,11 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { Share2 } from 'lucide-react-native';
+import { Bookmark, Share2 } from 'lucide-react-native';
 import { Pressable, Share, Text, View } from 'react-native';
 
 import { Markdown } from '@/components/Markdown';
-import { Screen, T } from '@/components/ui';
+import { Screen, T, tap } from '@/components/ui';
 import { WEB_BASE } from '@/lib/api';
+import { useAuth } from '@/lib/auth';
 import { getArticleBySlug } from '@shared/data/articles';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fonts, space } from '@/theme/tokens';
@@ -12,6 +13,7 @@ import { fonts, space } from '@/theme/tokens';
 export default function ArticleScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const { c } = useTheme();
+  const { isFavorite, toggleFavorite } = useAuth();
   const a = getArticleBySlug(slug);
 
   if (!a) {
@@ -19,15 +21,30 @@ export default function ArticleScreen() {
   }
 
   const url = `${WEB_BASE}/article/${a.slug}`;
+  const favorited = isFavorite(a.slug);
+
+  const handleToggleFav = () => {
+    tap();
+    toggleFavorite(a.slug);
+  };
 
   return (
     <>
       <Stack.Screen
         options={{
           headerRight: () => (
-            <Pressable hitSlop={10} onPress={() => Share.share({ message: `${a.title}\n${url}`, url })}>
-              <Share2 size={20} color={c.textPrimary} />
-            </Pressable>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+              <Pressable hitSlop={10} onPress={handleToggleFav}>
+                <Bookmark
+                  size={20}
+                  color={favorited ? c.coral : c.textPrimary}
+                  fill={favorited ? c.coral : 'transparent'}
+                />
+              </Pressable>
+              <Pressable hitSlop={10} onPress={() => Share.share({ message: `${a.title}\n${url}`, url })}>
+                <Share2 size={20} color={c.textPrimary} />
+              </Pressable>
+            </View>
           ),
         }}
       />

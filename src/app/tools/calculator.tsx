@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useState, useMemo, useEffect } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { Card, Chip, Screen, T, tap } from '@/components/ui';
@@ -6,6 +7,8 @@ import { useRates, Cur } from '@/lib/data';
 import { nf, money } from '@/lib/format';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fonts, radius, space } from '@/theme/tokens';
+
+const STORAGE_KEY = 'epats_calc_prefs_v1';
 
 const CITIES = [
   { id: 'danang', name: 'Дананг', flag: '🏖️', factor: 1.0 },
@@ -50,9 +53,51 @@ export default function BudgetCalculator() {
   const [famId, setFamId] = useState<FamId>('solo');
   const [cur, setCur] = useState<Cur>('VND');
 
-  const city = CITIES.find(x => x.id === cityId)!;
-  const life = LIFESTYLES.find(x => x.id === lifeId)!;
-  const fam = FAMILY_OPTIONS.find(x => x.id === famId)!;
+  useEffect(() => {
+    AsyncStorage.getItem(STORAGE_KEY).then(raw => {
+      if (raw) {
+        try {
+          const d = JSON.parse(raw);
+          if (d.cityId) setCityId(d.cityId);
+          if (d.lifeId) setLifeId(d.lifeId);
+          if (d.famId) setFamId(d.famId);
+          if (d.cur) setCur(d.cur);
+        } catch {}
+      }
+    }).catch(() => {});
+  }, []);
+
+  const savePrefs = (cId: CityId, lId: LifeId, fId: FamId, cu: Cur) => {
+    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ cityId: cId, lifeId: lId, famId: fId, cur: cu })).catch(() => {});
+  };
+
+  const handleCity = (id: CityId) => {
+    tap();
+    setCityId(id);
+    savePrefs(id, lifeId, famId, cur);
+  };
+
+  const handleLife = (id: LifeId) => {
+    tap();
+    setLifeId(id);
+    savePrefs(cityId, id, famId, cur);
+  };
+
+  const handleFam = (id: FamId) => {
+    tap();
+    setFamId(id);
+    savePrefs(cityId, lifeId, id, cur);
+  };
+
+  const handleCur = (id: Cur) => {
+    tap();
+    setCur(id);
+    savePrefs(cityId, lifeId, famId, id);
+  };
+
+  const city = CITIES.find(x => x.id === cityId) || CITIES[0];
+  const life = LIFESTYLES.find(x => x.id === lifeId) || LIFESTYLES[1];
+  const fam = FAMILY_OPTIONS.find(x => x.id === famId) || FAMILY_OPTIONS[0];
 
   const { items, totalVnd } = useMemo(() => {
     let tot = 0;
@@ -88,7 +133,7 @@ export default function BudgetCalculator() {
               key={ct.id}
               label={`${ct.flag} ${ct.name}`}
               active={cityId === ct.id}
-              onPress={() => setCityId(ct.id)}
+              onPress={() => handleCity(ct.id)}
             />
           ))}
         </View>
@@ -101,7 +146,7 @@ export default function BudgetCalculator() {
           {LIFESTYLES.map(lf => (
             <Pressable
               key={lf.id}
-              onPress={() => { tap(); setLifeId(lf.id); }}
+              onPress={() => handleLife(lf.id)}
               style={{
                 flex: 1, padding: 12, borderRadius: radius.md, borderWidth: 1,
                 borderColor: lifeId === lf.id ? c.accent : c.border,
@@ -128,7 +173,7 @@ export default function BudgetCalculator() {
               key={fm.id}
               label={`${fm.icon} ${fm.name}`}
               active={famId === fm.id}
-              onPress={() => setFamId(fm.id)}
+              onPress={() => handleFam(fm.id)}
             />
           ))}
         </View>
@@ -140,7 +185,7 @@ export default function BudgetCalculator() {
           <T v="label" style={{ color: c.accent }}>Итого в месяц</T>
           <View style={{ flexDirection: 'row', gap: 6 }}>
             {(['VND', 'RUB', 'USD'] as Cur[]).map(cu => (
-              <Chip key={cu} label={cu} active={cur === cu} onPress={() => setCur(cu)} />
+              <Chip key={cu} label={cu} active={cur === cu} onPress={() => handleCur(cu)} />
             ))}
           </View>
         </View>
@@ -150,7 +195,7 @@ export default function BudgetCalculator() {
         </Text>
 
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', borderTopWidth: 1, borderTopColor: c.border, paddingTop: 10 }}>
-          <T v="muted">В день: ~{displaySum(Math.round(totalVnd / 30))}</T>
+          <T v="muted">В день: ~${displaySum(Math.round(totalVnd / 30))}</T>
           <T v="muted">
             {cur !== 'RUB' && `≈ ${money(Math.round(totalVnd * (r.vndRub || 0.003218)), 'RUB')}`}
           </T>
@@ -174,7 +219,6 @@ export default function BudgetCalculator() {
                 </Text>
               </View>
 
-              {/* Progress track */}
               <View style={{ height: 4, borderRadius: 2, backgroundColor: c.bgSecondary, overflow: 'hidden' }}>
                 <View style={{ width: `${pct}%`, height: '100%', backgroundColor: c.coral, borderRadius: 2 }} />
               </View>

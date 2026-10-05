@@ -1,13 +1,8 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { AppState, Linking } from 'react-native';
 
 import { api, loadToken, saveToken } from './api';
-
-/* ─── Вход через Telegram-бота (тот же флоу, что на сайте, но токен вместо cookie) ───
-   1. POST /api/auth/start  → { url, loginToken }
-   2. Открываем t.me/epatsiobot?start=login_… — пользователь жмёт «Подтвердить»
-   3. GET  /api/auth/poll   (X-Epats-Login-Token) → { status: 'ok', token, user }
-   4. Токен в SecureStore, дальше все запросы с Authorization: Bearer            */
 
 export interface PublicUser {
   id: number;
@@ -17,10 +12,15 @@ export interface PublicUser {
   has_photo: boolean;
 }
 
+export interface FavoriteItem {
+  kind: string;
+  ref: string;
+}
+
 interface MeResponse {
   user: PublicUser | null;
   settings: Record<string, unknown>;
-  favorites: { kind: string; ref: string }[];
+  favorites: FavoriteItem[];
   configured: boolean;
 }
 
@@ -30,6 +30,9 @@ interface AuthCtx {
   loading: boolean;
   user: PublicUser | null;
   me: MeResponse | null;
+  favorites: string[];
+  isFavorite: (slug: string) => boolean;
+  toggleFavorite: (slug: string) => Promise<boolean>;
   loginState: LoginState;
   login: () => Promise<void>;
   cancelLogin: () => void;
@@ -39,21 +42,43 @@ interface AuthCtx {
 
 const Ctx = createContext<AuthCtx | null>(null);
 const POLL_MS = 2000;
+const FAV_STORAGE_KEY = 'epats_fav_articles';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [me, setMe] = useState<MeResponse | null>(null);
+  const [localFavs, setLocalFavs] = useState<string[]>([]);
   const [loginState, setLoginState] = useState<LoginState>('idle');
   const loginToken = useRef<string | null>(null);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Load offline local favorites on mount
+  useEffect(() => {
+    AsyncStorage.getItem(FAV_STORAGE_KEY).then(raw => {
+      if (raw) {
+        try {
+          const list = JSON.parse(raw);
+          if (Array.isArray(list)) setLocalFavs(list);
+        } catch {}
+      }
+    }).catch(() => {});
+  }, []);
 
   const reload = useCallback(async () => {
     try {
       const data = await api<MeResponse>('/api/me');
       setMe(data);
-      if (!data.user) await saveToken(null); // токен истёк/пользователь удалён
+      if (data.favorites && data.favorites.length > 0) {
+        const serverFavSlugs = data.favorites.filter(f => f.kind === 'article').map(f => f.ref);
+        setLocalFavs(prev => {
+          const merged = Array.from(new Set([...prev, ...serverFavSlugs]));
+          AsyncStorage.setItem(FAV_STORAGE_KEY, JSON.stringify(merged)).catch(() => {});
+          return merged;
+        });
+      }
+      if (!data.user) await saveToken(null);
     } catch {
-      // офлайн — оставляем как было
+      // offline - keep existing state
     } finally {
       setLoading(false);
     }
@@ -87,7 +112,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {}
   }, [reload, stopPolling]);
 
-  // Вернулись из Telegram — проверяем сразу, не дожидаясь таймера
   useEffect(() => {
     const sub = AppState.addEventListener('change', s => { if (s === 'active') poll(); });
     return () => { sub.remove(); stopPolling(); };
@@ -118,8 +142,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setMe(m => (m ? { ...m, user: null, favorites: [] } : m));
   }, []);
 
+  const isFavorite = useCallback((slug: string) => {
+    return localFavs.includes(slug);
+  }, [localFavs]);
+
+  const toggleFavorite = useCallback(async (slug: string): Promise<boolean> => {
+    const isCurrentlyFav = localFavs.includes(slug);
+    const nextOn = !isCurrentlyFav;
+    const nextList = nextOn ? [...localFavs, slug] : localFavs.filter(s => s !== slug);
+
+    setLocalFavs(nextList);
+    AsyncStorage.setItem(FAV_STORAGE_KEY, JSON.stringify(nextList)).catch(() => {});
+
+    if (me?.user) {
+      try {
+        await api('/api/me/favorites', {
+          method: 'POST',
+          body: JSON.stringify({ kind: 'article', ref: slug, on: nextOn }),
+        });
+      } catch {}
+    }
+    return nextOn;
+  }, [localFavs, me?.user]);
+
   return (
-    <Ctx.Provider value={{ loading, user: me?.user ?? null, me, loginState, login, cancelLogin, logout, reload }}>
+    <Ctx.Provider value={{
+      loading,
+      user: me?.user ?? null,
+      me,
+      favorites: localFavs,
+      isFavorite,
+      toggleFavorite,
+      loginState,
+      login,
+      cancelLogin,
+      logout,
+      reload,
+    }}>
       {children}
     </Ctx.Provider>
   );
