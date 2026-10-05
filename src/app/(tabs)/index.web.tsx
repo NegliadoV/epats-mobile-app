@@ -849,7 +849,7 @@ export default function HomeWebScreen() {
                     {tool.badge}
                   </span>
                 )}
-                <div className="icon-spring" style={{ fontSize: 36, marginBottom: 12 }}>{tool.icon}</div>
+                <div className="icon-spring" style={{ marginBottom: 14 }}><TropicIcon name={iconForTool(tool.href)} size={48} /></div>
                 <h3 style={{ fontSize: 16.5, fontWeight: 800, color: '#fff', margin: '0 0 8px', lineHeight: 1.3 }}>
                   {tool.title}
                 </h3>
@@ -904,7 +904,7 @@ export default function HomeWebScreen() {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                  <span style={{ fontSize: 24 }}>{a.emoji}</span>
+                  <TropicIcon name={iconForCategory(a.categorySlug)} size={38} />
                   <span style={{ fontSize: 12, fontWeight: 800, color: '#1fd1c1', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                     {a.category}
                   </span>
@@ -958,7 +958,7 @@ export default function HomeWebScreen() {
                     transition: 'all 0.15s ease',
                   }}
                 >
-                  <span style={{ fontSize: 26 }}>{cat.emoji}</span>
+                  <TropicIcon name={iconForCategory(cat.slug)} size={40} />
                   <div>
                     <div style={{ fontSize: 14, fontWeight: 800, color: '#fff' }}>{cat.name}</div>
                     <div style={{ fontSize: 12, color: '#64748b' }}>{count} {count === 1 ? 'статья' : 'статей'}</div>
