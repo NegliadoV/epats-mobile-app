@@ -16,6 +16,7 @@ import { scheduleVisaReminder } from '@/lib/notifications';
 import { useAuth } from '@/lib/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fonts, radius, space } from '@/theme/tokens';
+import { maskDateInput, toDisplayDate, toIsoDate, parseDateInput } from '@/lib/dateUtils';
 
 /* ─── Данные виз и маршрутов (1-в-1 из веб-версии) ─── */
 
@@ -428,12 +429,7 @@ function formatShortDate(d: Date): string {
   return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
 }
 
-function toIsoDate(d: Date): string {
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
+
 
 function getDaysLeft(target: Date): number {
   const now = new Date();
@@ -459,20 +455,20 @@ export default function VisaToolScreen() {
 
   // Режим калькулятора: по дате въезда или дате выезда
   const [calcMode, setCalcMode] = useState<CalcMode>('entry');
-  const [entryDate, setEntryDate] = useState(() => settings.entry_date || toIsoDate(new Date()));
+  const [entryDate, setEntryDate] = useState(() => toDisplayDate(settings.entry_date || new Date()));
   const [exitDate, setExitDate] = useState('');
   const [visaType, setVisaType] = useState<VisaType>((settings.visa_type as VisaType) || 'evisa90_single');
   const [savedToProfile, setSavedToProfile] = useState(false);
 
   useEffect(() => {
-    if (settings.entry_date) setEntryDate(settings.entry_date);
+    if (settings.entry_date) setEntryDate(toDisplayDate(settings.entry_date));
     if (settings.visa_type) setVisaType(settings.visa_type as VisaType);
   }, [settings.entry_date, settings.visa_type]);
 
   const handleSaveToProfile = async () => {
     tap();
     if (entryDate) {
-      await saveSettings({ entry_date: entryDate, visa_type: visaType });
+      await saveSettings({ entry_date: toIsoDate(entryDate), visa_type: visaType });
       setSavedToProfile(true);
       setTimeout(() => setSavedToProfile(false), 2500);
     }
@@ -485,8 +481,8 @@ export default function VisaToolScreen() {
   const result = useMemo(() => {
     if (calcMode === 'entry') {
       if (!entryDate) return null;
-      const entry = new Date(entryDate);
-      if (isNaN(entry.getTime())) return null;
+      const entry = parseDateInput(entryDate);
+      if (!entry || isNaN(entry.getTime())) return null;
       const deadline = addDays(entry, selectedVisaObj.days - 1);
       const applyDate = addDays(deadline, -10);
       const recommendedBorderDate = addDays(deadline, -3);
@@ -499,8 +495,8 @@ export default function VisaToolScreen() {
       };
     } else {
       if (!exitDate) return null;
-      const deadline = new Date(exitDate);
-      if (isNaN(deadline.getTime())) return null;
+      const deadline = parseDateInput(exitDate);
+      if (!deadline || isNaN(deadline.getTime())) return null;
       const entry = addDays(deadline, -(selectedVisaObj.days - 1));
       const applyDate = addDays(deadline, -10);
       const recommendedBorderDate = addDays(deadline, -3);
@@ -635,13 +631,13 @@ export default function VisaToolScreen() {
   const shiftDate = (days: number) => {
     tap();
     if (calcMode === 'entry') {
-      const current = entryDate ? new Date(entryDate) : new Date();
+      const current = parseDateInput(entryDate) || new Date();
       current.setDate(current.getDate() + days);
-      setEntryDate(toIsoDate(current));
+      setEntryDate(toDisplayDate(current));
     } else {
-      const current = exitDate ? new Date(exitDate) : new Date();
+      const current = parseDateInput(exitDate) || new Date();
       current.setDate(current.getDate() + days);
-      setExitDate(toIsoDate(current));
+      setExitDate(toDisplayDate(current));
     }
   };
 
@@ -684,7 +680,7 @@ export default function VisaToolScreen() {
             onPress={() => {
               tap();
               setCalcMode('entry');
-              if (result && !entryDate) setEntryDate(toIsoDate(result.entry));
+              if (result && !entryDate) setEntryDate(toDisplayDate(result.entry));
             }}
             style={{
               flex: 1, paddingVertical: 10, borderRadius: radius.sm,
@@ -704,7 +700,7 @@ export default function VisaToolScreen() {
             onPress={() => {
               tap();
               setCalcMode('exit');
-              if (result && !exitDate) setExitDate(toIsoDate(result.deadline));
+              if (result && !exitDate) setExitDate(toDisplayDate(result.deadline));
             }}
             style={{
               flex: 1, paddingVertical: 10, borderRadius: radius.sm,
@@ -735,8 +731,12 @@ export default function VisaToolScreen() {
             <Calendar size={18} color={c.accent} />
             <TextInput
               value={calcMode === 'entry' ? entryDate : exitDate}
-              onChangeText={val => calcMode === 'entry' ? setEntryDate(val) : setExitDate(val)}
-              placeholder="ГГГГ-ММ-ДД (напр. 2026-10-04)"
+              onChangeText={val => {
+                const masked = maskDateInput(val);
+                calcMode === 'entry' ? setEntryDate(masked) : setExitDate(masked);
+              }}
+              keyboardType="numeric"
+              placeholder="ДД.ММ.ГГГГ (напр. 04.10.2026)"
               placeholderTextColor={c.textMuted}
               style={{
                 flex: 1, color: c.textPrimary, fontFamily: fonts.bodyHeavy,
@@ -750,7 +750,7 @@ export default function VisaToolScreen() {
             <Pressable
               onPress={() => {
                 tap();
-                const today = toIsoDate(new Date());
+                const today = toDisplayDate(new Date());
                 calcMode === 'entry' ? setEntryDate(today) : setExitDate(today);
               }}
               style={{ paddingVertical: 5, paddingHorizontal: 10, borderRadius: 8, backgroundColor: c.bgCardHover, borderWidth: 1, borderColor: c.border }}
@@ -807,14 +807,16 @@ export default function VisaToolScreen() {
                     gap: 4,
                   }}
                 >
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
                     <Text style={{
+                      flex: 1,
                       fontFamily: fonts.bodyHeavy, fontSize: 13.5,
                       color: active ? c.accent : c.textPrimary,
                     }}>
                       {v.name}
                     </Text>
                     <View style={{
+                      flexShrink: 0,
                       backgroundColor: c.bgPrimary, paddingHorizontal: 8, paddingVertical: 2,
                       borderRadius: 6, borderWidth: 1, borderColor: c.border,
                     }}>

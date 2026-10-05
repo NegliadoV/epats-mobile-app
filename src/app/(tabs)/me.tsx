@@ -4,7 +4,7 @@ import {
   Bell, Check, ChevronRight, Clock, Heart, LogOut,
   Send, ShieldCheck, Star, Trash2, Calendar, AlertCircle
 } from 'lucide-react-native';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
 import { Card, Chip, GradientButton, Screen, T, tap } from '@/components/ui';
@@ -14,6 +14,7 @@ import { useAuth, CityId, VisaTypeId, CurrencyId, LifestyleId, FamilyId } from '
 import { getArticleBySlug } from '@/data/articles';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fonts, radius, space } from '@/theme/tokens';
+import { maskDateInput, toDisplayDate, toIsoDate, parseDateInput } from '@/lib/dateUtils';
 
 const CITIES: { id: CityId; name: string }[] = [
   { id: 'danang', name: '🏖️ Дананг' },
@@ -52,7 +53,11 @@ const FAMILIES: { id: FamilyId; label: string }[] = [
 export default function MeScreen() {
   const { c } = useTheme();
   const { loading, user, settings, saveSettings, favorites, toggleFavorite, loginState, login, cancelLogin, logout } = useAuth();
-  const [entryInput, setEntryInput] = useState(settings.entry_date || '');
+  const [entryInput, setEntryInput] = useState(() => toDisplayDate(settings.entry_date) || '');
+
+  useEffect(() => {
+    setEntryInput(toDisplayDate(settings.entry_date) || '');
+  }, [settings.entry_date]);
   const [savingMsg, setSavingMsg] = useState(false);
 
   // Расчет статуса визы
@@ -81,21 +86,29 @@ export default function MeScreen() {
   const handleSaveEntryDate = () => {
     tap();
     const val = entryInput.trim();
-    if (!val || /^\d{4}-\d{2}-\d{2}$/.test(val)) {
-      saveSettings({ entry_date: val || null });
+    if (!val) {
+      saveSettings({ entry_date: null });
+      setSavingMsg(true);
+      setTimeout(() => setSavingMsg(false), 2000);
+      return;
+    }
+    const parsed = parseDateInput(val);
+    if (parsed) {
+      const iso = toIsoDate(parsed);
+      saveSettings({ entry_date: iso });
       setSavingMsg(true);
       setTimeout(() => setSavingMsg(false), 2000);
     } else {
-      Alert.alert('Неверный формат даты', 'Используйте формат ГГГГ-ММ-ДД (например: 2026-03-15)');
+      Alert.alert('Неверный формат даты', 'Используйте формат ДД.ММ.ГГГГ (например: 01.03.2026)');
     }
   };
 
   const setTodayEntry = () => {
     tap();
     const now = new Date();
-    const iso = now.toISOString().slice(0, 10);
-    setEntryInput(iso);
-    saveSettings({ entry_date: iso });
+    const display = toDisplayDate(now);
+    setEntryInput(display);
+    saveSettings({ entry_date: toIsoDate(now) });
     setSavingMsg(true);
     setTimeout(() => setSavingMsg(false), 2000);
   };
@@ -212,12 +225,13 @@ export default function MeScreen() {
 
         {/* Дата въезда */}
         <View style={{ gap: 6 }}>
-          <T v="label">Дата въезда во Вьетнам (ГГГГ-ММ-ДД)</T>
+          <T v="label">Дата въезда во Вьетнам (ДД.ММ.ГГГГ)</T>
           <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
             <TextInput
               value={entryInput}
-              onChangeText={setEntryInput}
-              placeholder="Например: 2026-03-01"
+              onChangeText={v => setEntryInput(maskDateInput(v))}
+              placeholder="01.03.2026"
+              keyboardType="numeric"
               placeholderTextColor={c.textMuted}
               style={{
                 flex: 1, backgroundColor: c.bgSecondary, borderRadius: radius.md,
@@ -293,7 +307,7 @@ export default function MeScreen() {
 
         <View style={{ gap: 6 }}>
           <T v="label">Основная валюта</T>
-          <View style={{ flexDirection: 'row', gap: 8 }}>
+          <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
             {CURRENCIES.map(cu => (
               <Chip
                 key={cu.id}
@@ -307,7 +321,7 @@ export default function MeScreen() {
 
         <View style={{ gap: 6 }}>
           <T v="label">Стиль жизни</T>
-          <View style={{ flexDirection: 'row', gap: 8 }}>
+          <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
             {LIFESTYLES.map(lf => (
               <Chip
                 key={lf.id}

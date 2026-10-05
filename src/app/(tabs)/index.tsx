@@ -16,6 +16,7 @@ import { nf, timeAgo } from '@/lib/format';
 import { openTool, TOOLS } from '@/lib/tools';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fonts, radius, space } from '@/theme/tokens';
+import { formatWeatherDay, toDisplayDate } from '@/lib/dateUtils';
 
 const CITY_ORDER = ['danang', 'nhatrang', 'hcm', 'hanoi', 'phuquoc'];
 const CITY_NAMES: Record<string, string> = {
@@ -235,7 +236,7 @@ export default function Home() {
           </View>
 
           <Text style={{ fontFamily: fonts.body, fontSize: 12, color: c.textSecondary, lineHeight: 16 }}>
-            🔔 Бот отслеживает дедлайн визы ({settings.entry_date ? `въезд ${settings.entry_date}` : 'укажи дату въезда в профиле'}) и штормовые алерты по городу {CITY_NAMES[city] || city}.
+            🔔 Бот отслеживает дедлайн визы ({settings.entry_date ? `въезд ${toDisplayDate(settings.entry_date)}` : 'укажи дату въезда в профиле'}) и штормовые алерты по городу {CITY_NAMES[city] || city}.
           </Text>
         </Card>
       )}
@@ -267,7 +268,7 @@ export default function Home() {
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
                 {w.daily.slice(0, 7).map(d => (
                   <View key={d.date} style={{ alignItems: 'center', gap: 2, paddingVertical: 8, paddingHorizontal: 10, borderRadius: radius.md, backgroundColor: c.bgSecondary }}>
-                    <T v="muted" style={{ fontSize: 11 }}>{new Date(d.date).toLocaleDateString('ru-RU', { weekday: 'short' })}</T>
+                    <T v="muted" style={{ fontSize: 11 }}>{formatWeatherDay(d.date)}</T>
                     <Text style={{ fontSize: 20 }}>{d.emoji}</Text>
                     <Text style={{ fontFamily: fonts.bodyHeavy, color: c.textPrimary, fontSize: 13 }}>{Math.round(d.tempMax)}°</Text>
                     <T v="muted" style={{ fontSize: 11 }}>{Math.round(d.tempMin)}°</T>

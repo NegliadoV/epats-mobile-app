@@ -6,6 +6,7 @@ import { Card, Chip, Screen, Stat, T } from '@/components/ui';
 import { CITY_NAMES, CITY_ORDER, useWeather } from '@/lib/data';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fonts, radius, space } from '@/theme/tokens';
+import { formatWeatherDay } from '@/lib/dateUtils';
 
 export default function WeatherScreen() {
   const { c } = useTheme();
@@ -93,7 +94,7 @@ export default function WeatherScreen() {
                 }}
               >
                 <T v="muted" style={{ fontSize: 11 }}>
-                  {new Date(d.date).toLocaleDateString('ru-RU', { weekday: 'short' })}
+                  {formatWeatherDay(d.date)}
                 </T>
                 <Text style={{ fontSize: 24 }}>{d.emoji}</Text>
                 <Text style={{ fontFamily: fonts.bodyHeavy, color: c.textPrimary, fontSize: 14 }}>

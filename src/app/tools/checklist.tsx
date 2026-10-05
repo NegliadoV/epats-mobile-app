@@ -146,12 +146,21 @@ export default function Checklist() {
               </View>
 
               <View style={{ flex: 1, gap: 4 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 6 }}>
                   {it.critical && !isDone && (
-                    <Text style={{ fontFamily: fonts.bodyHeavy, fontSize: 10, color: c.coral, textTransform: 'uppercase' }}>Важно</Text>
+                    <View style={{
+                      backgroundColor: c.coral + '22',
+                      paddingHorizontal: 6,
+                      paddingVertical: 2,
+                      borderRadius: 4,
+                      marginTop: 2,
+                    }}>
+                      <Text style={{ fontFamily: fonts.bodyHeavy, fontSize: 10, color: c.coral, textTransform: 'uppercase' }}>Важно</Text>
+                    </View>
                   )}
                   <Text
                     style={{
+                      flex: 1,
                       fontFamily: fonts.bodyHeavy, fontSize: 15,
                       color: isDone ? c.textMuted : c.textPrimary,
                       textDecorationLine: isDone ? 'line-through' : 'none',

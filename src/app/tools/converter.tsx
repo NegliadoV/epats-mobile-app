@@ -83,11 +83,30 @@ export default function Converter() {
         </View>
       </Card>
 
+      {/* Цифровая клавиатура */}
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+        {KEYS.map(k => (
+          <Pressable
+            key={k}
+            onPress={() => press(k)}
+            onLongPress={k === '⌫' ? () => { tap(); setRaw(''); } : undefined}
+            style={({ pressed }) => ({
+              width: '31.5%', flexGrow: 1, height: 56, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center',
+              backgroundColor: pressed ? c.bgCardHover : c.bgCard, borderWidth: 1, borderColor: c.border,
+            })}
+          >
+            {k === '⌫'
+              ? <Delete size={22} color={c.textSecondary} />
+              : <Text style={{ fontFamily: fonts.bodyHeavy, fontSize: 22, color: c.textPrimary }}>{k}</Text>}
+          </Pressable>
+        ))}
+      </View>
+
       {/* Результаты */}
       <View style={{ gap: 10 }}>
         {CURRENCIES.filter(x => x.id !== from).map(x => (
           <Card key={x.id} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 14 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1, marginRight: 8 }}>
               <Text style={{ fontSize: 24, color: c.textPrimary }}>{x.flag}</Text>
               <View>
                 <Text style={{ fontFamily: fonts.bodyHeavy, color: c.textPrimary, fontSize: 15 }}>{x.id}</Text>
@@ -127,24 +146,7 @@ export default function Converter() {
         </View>
       </Card>
 
-      {/* Цифровая клавиатура */}
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-        {KEYS.map(k => (
-          <Pressable
-            key={k}
-            onPress={() => press(k)}
-            onLongPress={k === '⌫' ? () => { tap(); setRaw(''); } : undefined}
-            style={({ pressed }) => ({
-              width: '31.5%', flexGrow: 1, height: 56, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center',
-              backgroundColor: pressed ? c.bgCardHover : c.bgCard, borderWidth: 1, borderColor: c.border,
-            })}
-          >
-            {k === '⌫'
-              ? <Delete size={22} color={c.textSecondary} />
-              : <Text style={{ fontFamily: fonts.bodyHeavy, fontSize: 22, color: c.textPrimary }}>{k}</Text>}
-          </Pressable>
-        ))}
-      </View>
+      
 
       <T v="muted" style={{ textAlign: 'center' }}>
         {offline ? 'Офлайн — используется последний сохранённый курс · ' : 'Курс '}{timeAgo(updatedAt)}
