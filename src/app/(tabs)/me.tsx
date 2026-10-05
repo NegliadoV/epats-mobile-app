@@ -1,11 +1,11 @@
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import {
-  Bell, Check, ChevronRight, Clock, Heart, LogOut,
+  Bell, Check, CheckCircle2, ChevronRight, Clock, Heart, LogOut,
   Send, ShieldCheck, Star, Trash2, Calendar, AlertCircle
 } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
 import { Card, Chip, GradientButton, Screen, T, tap } from '@/components/ui';
 import BrandLogo from '@/components/BrandLogo';
@@ -52,7 +52,7 @@ const FAMILIES: { id: FamilyId; label: string }[] = [
 
 export default function MeScreen() {
   const { c } = useTheme();
-  const { loading, user, settings, saveSettings, favorites, toggleFavorite, loginState, login, cancelLogin, logout } = useAuth();
+  const { loading, user, settings, saveSettings, favorites, toggleFavorite, loginState, botUrl, login, checkLogin, cancelLogin, logout } = useAuth();
   const [entryInput, setEntryInput] = useState(() => toDisplayDate(settings.entry_date) || '');
 
   useEffect(() => {
@@ -170,12 +170,44 @@ export default function MeScreen() {
             </T>
           </View>
           {loginState === 'waiting' ? (
-            <>
-              <ActivityIndicator color={c.tg} />
-              <T v="h3" style={{ textAlign: 'center' }}>Подтвердите вход в Telegram</T>
-              <T v="muted" style={{ textAlign: 'center' }}>Нажмите «Start» у бота @epatsiobot и вернитесь в приложение</T>
-              <Pressable onPress={cancelLogin}><Text style={{ fontFamily: fonts.bodyBold, color: c.textMuted }}>Отмена</Text></Pressable>
-            </>
+            <View style={{ width: '100%', alignItems: 'center', gap: 12 }}>
+              <ActivityIndicator size="large" color={c.tg} />
+              <View style={{ alignItems: 'center', gap: 4 }}>
+                <T v="h3" style={{ textAlign: 'center' }}>Ожидаем вход из Telegram...</T>
+                <T v="muted" style={{ textAlign: 'center', fontSize: 13 }}>
+                  Нажмите «Start» у бота @epatsiobot и подтвердите вход
+                </T>
+              </View>
+
+              <View style={{ width: '100%', gap: 8, marginTop: 4 }}>
+                <GradientButton
+                  kind="tg"
+                  title="Я нажал Start в боте (проверить)"
+                  icon={<CheckCircle2 size={18} color="#fff" />}
+                  onPress={checkLogin}
+                />
+                {botUrl && (
+                  <Pressable
+                    onPress={() => Linking.openURL(botUrl)}
+                    style={{
+                      paddingVertical: 10,
+                      borderRadius: radius.pill,
+                      backgroundColor: 'rgba(42,171,238,0.12)',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Text style={{ fontFamily: fonts.bodyBold, color: c.tg, fontSize: 13 }}>
+                      Открыть бота снова ↗
+                    </Text>
+                  </Pressable>
+                )}
+                <Pressable onPress={cancelLogin} style={{ paddingVertical: 6, alignItems: 'center' }}>
+                  <Text style={{ fontFamily: fonts.bodyBold, color: c.textMuted, fontSize: 13 }}>
+                    Отмена
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
           ) : (
             <>
               <GradientButton kind="tg" title="Войти через Telegram" icon={<Send size={18} color="#fff" />} onPress={login} style={{ alignSelf: 'stretch' }} />

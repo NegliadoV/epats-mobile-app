@@ -74,7 +74,9 @@ interface AuthCtx {
   isFavorite: (slug: string) => boolean;
   toggleFavorite: (slug: string) => Promise<boolean>;
   loginState: LoginState;
+  botUrl: string | null;
   login: () => Promise<void>;
+  checkLogin: () => Promise<void>;
   loginDemo: () => Promise<void>;
   cancelLogin: () => void;
   logout: () => Promise<void>;
@@ -85,6 +87,7 @@ const Ctx = createContext<AuthCtx | null>(null);
 const POLL_MS = 2000;
 const FAV_STORAGE_KEY = 'epats_fav_articles';
 const SETTINGS_STORAGE_KEY = 'epats_user_settings_v1';
+const CACHED_USER_KEY = 'epats_cached_user';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
@@ -92,15 +95,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
   const [localFavs, setLocalFavs] = useState<string[]>([]);
   const [loginState, setLoginState] = useState<LoginState>('idle');
+  const [botUrl, setBotUrl] = useState<string | null>(null);
   const loginToken = useRef<string | null>(null);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Load offline local favorites and settings on mount
+  // Load offline local favorites, settings and cached user on mount
   useEffect(() => {
     Promise.all([
       AsyncStorage.getItem(FAV_STORAGE_KEY),
       AsyncStorage.getItem(SETTINGS_STORAGE_KEY),
-    ]).then(([favRaw, setRaw]) => {
+      AsyncStorage.getItem(CACHED_USER_KEY),
+    ]).then(([favRaw, setRaw, userRaw]) => {
       if (favRaw) {
         try {
           const list = JSON.parse(favRaw);
@@ -113,6 +118,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setSettings(prev => ({ ...prev, ...parsed }));
         } catch {}
       }
+      if (userRaw) {
+        try {
+          const u = JSON.parse(userRaw);
+          if (u?.id) {
+            setMe(prev => ({
+              user: u,
+              settings: prev?.settings ?? DEFAULT_SETTINGS,
+              favorites: prev?.favorites ?? [],
+              configured: true,
+            }));
+          }
+        } catch {}
+      }
     }).catch(() => {});
   }, []);
 
@@ -120,6 +138,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const data = await api<MeResponse>('/api/me');
       setMe(data);
+
+      if (data.user) {
+        await AsyncStorage.setItem(CACHED_USER_KEY, JSON.stringify(data.user)).catch(() => {});
+      }
 
       // Синхронизация избранного с сервером
       if (data.favorites && data.favorites.length > 0) {
@@ -139,8 +161,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return merged;
         });
       }
-
-      if (!data.user) await saveToken(null);
     } catch {
       // offline - keep existing state
     } finally {
@@ -160,40 +180,73 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const poll = useCallback(async () => {
     if (!loginToken.current) return;
     try {
-      const r = await api<{ status: string; token?: string }>('/api/auth/poll', {
-        headers: { 'X-Epats-Login-Token': loginToken.current },
-      });
+      const token = loginToken.current;
+      const r = await api<{ status: string; token?: string; user?: PublicUser }>(
+        `/api/auth/poll?token=${encodeURIComponent(token)}`,
+        {
+          headers: { 'X-Epats-Login-Token': token },
+        }
+      );
       if (r.status === 'ok' && r.token) {
         stopPolling();
         loginToken.current = null;
+        setBotUrl(null);
         await saveToken(r.token);
+        if (r.user) {
+          setMe(prev => ({
+            user: r.user!,
+            settings: prev?.settings ?? DEFAULT_SETTINGS,
+            favorites: prev?.favorites ?? [],
+            configured: true,
+          }));
+          await AsyncStorage.setItem(CACHED_USER_KEY, JSON.stringify(r.user)).catch(() => {});
+        }
         setLoginState('idle');
         await reload();
       } else if (r.status === 'expired' || r.status === 'error') {
         stopPolling();
         setLoginState('error');
       }
-    } catch {}
+    } catch (e) {
+      console.warn('[auth] poll warning', e);
+    }
   }, [reload, stopPolling]);
 
+  // При возврате приложения из фона на Android / iOS сразу проверяем статус и перезапускаем таймер если нужно
   useEffect(() => {
-    const sub = AppState.addEventListener('change', s => { if (s === 'active') poll(); });
-    return () => { sub.remove(); stopPolling(); };
+    const sub = AppState.addEventListener('change', s => {
+      if (s === 'active' && loginToken.current) {
+        poll();
+        if (!timer.current) {
+          timer.current = setInterval(poll, POLL_MS);
+        }
+      }
+    });
+    return () => {
+      sub.remove();
+      stopPolling();
+    };
   }, [poll, stopPolling]);
 
   const login = useCallback(async () => {
     try {
+      setLoginState('waiting');
       const r = await api<{ ok: boolean; url: string; loginToken?: string }>('/api/auth/start', { method: 'POST' });
       if (!r.ok || !r.loginToken) throw new Error('start failed');
       loginToken.current = r.loginToken;
-      setLoginState('waiting');
+      setBotUrl(r.url);
       stopPolling();
       timer.current = setInterval(poll, POLL_MS);
       await Linking.openURL(r.url);
-    } catch {
+    } catch (e) {
+      console.error('[auth] start failed', e);
       setLoginState('error');
     }
   }, [poll, stopPolling]);
+
+  const checkLogin = useCallback(async () => {
+    await poll();
+  }, [poll]);
 
   const loginDemo = useCallback(async () => {
     const demoUser: PublicUser = {
@@ -211,6 +264,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       notify_visa: true,
     };
     await AsyncStorage.setItem('epats_demo_user', JSON.stringify({ user: demoUser, settings: demoSettings }));
+    await AsyncStorage.setItem(CACHED_USER_KEY, JSON.stringify(demoUser));
     setMe({ user: demoUser, settings: demoSettings, favorites: [], configured: true });
     setSettings(demoSettings);
   }, []);
@@ -218,13 +272,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const cancelLogin = useCallback(() => {
     stopPolling();
     loginToken.current = null;
+    setBotUrl(null);
     setLoginState('idle');
   }, [stopPolling]);
 
   const logout = useCallback(async () => {
     await AsyncStorage.removeItem('epats_demo_user');
+    await AsyncStorage.removeItem(CACHED_USER_KEY);
     await saveToken(null);
-    setMe(m => (m ? { ...m, user: null, favorites: [] } : m));
+    setMe(m => (m ? { ...m, user: null, favorites: [] } : null));
   }, []);
 
   const saveSettings = useCallback(async (patch: SettingsPatch): Promise<boolean> => {
@@ -290,7 +346,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isFavorite,
       toggleFavorite,
       loginState,
+      botUrl,
       login,
+      checkLogin,
       loginDemo,
       cancelLogin,
       logout,

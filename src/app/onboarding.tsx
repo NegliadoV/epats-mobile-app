@@ -6,7 +6,7 @@ import {
 } from 'lucide-react-native';
 import { useState, useEffect } from 'react';
 import {
-  ActivityIndicator, Pressable, ScrollView, Text, TextInput, View
+  ActivityIndicator, Linking, Pressable, ScrollView, Text, TextInput, View
 } from 'react-native';
 
 import { Card, Chip, GradientButton, Screen, T, tap } from '@/components/ui';
@@ -81,7 +81,7 @@ type StepType = 'auth' | 'city' | 'visa' | 'budget' | 'currency';
 
 export default function OnboardingScreen() {
   const { c } = useTheme();
-  const { user, settings, loginState, login, cancelLogin, saveSettings } = useAuth();
+  const { user, settings, loginState, botUrl, login, checkLogin, cancelLogin, saveSettings } = useAuth();
 
   // Если пользователь авторизован — шаг логина исключается!
   const steps: StepType[] = user
@@ -209,11 +209,43 @@ export default function OnboardingScreen() {
             </View>
 
             {loginState === 'waiting' ? (
-              <View style={{ alignItems: 'center', gap: 8 }}>
-                <ActivityIndicator color={c.tg} />
-                <T v="h3" style={{ textAlign: 'center' }}>Подтвердите вход в Telegram</T>
-                <T v="muted" style={{ textAlign: 'center' }}>Нажмите «Start» у бота @epatsiobot и вернитесь</T>
-                <Pressable onPress={cancelLogin}><Text style={{ fontFamily: fonts.bodyBold, color: c.textMuted }}>Отмена</Text></Pressable>
+              <View style={{ width: '100%', alignItems: 'center', gap: 12 }}>
+                <ActivityIndicator size="large" color={c.tg} />
+                <View style={{ alignItems: 'center', gap: 4 }}>
+                  <T v="h3" style={{ textAlign: 'center' }}>Ожидаем вход из Telegram...</T>
+                  <T v="muted" style={{ textAlign: 'center', fontSize: 13 }}>
+                    Нажмите «Start» у бота @epatsiobot и подтвердите вход
+                  </T>
+                </View>
+
+                <View style={{ width: '100%', gap: 8, marginTop: 4 }}>
+                  <GradientButton
+                    kind="tg"
+                    title="Я нажал Start в боте (проверить)"
+                    icon={<Sparkles size={18} color="#fff" />}
+                    onPress={checkLogin}
+                  />
+                  {botUrl && (
+                    <Pressable
+                      onPress={() => Linking.openURL(botUrl)}
+                      style={{
+                        paddingVertical: 10,
+                        borderRadius: radius.pill,
+                        backgroundColor: 'rgba(42,171,238,0.12)',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <Text style={{ fontFamily: fonts.bodyBold, color: c.tg, fontSize: 13 }}>
+                        Открыть бота снова ↗
+                      </Text>
+                    </Pressable>
+                  )}
+                  <Pressable onPress={cancelLogin} style={{ paddingVertical: 6, alignItems: 'center' }}>
+                    <Text style={{ fontFamily: fonts.bodyBold, color: c.textMuted, fontSize: 13 }}>
+                      Отмена
+                    </Text>
+                  </Pressable>
+                </View>
               </View>
             ) : (
               <View style={{ width: '100%', gap: 10 }}>
