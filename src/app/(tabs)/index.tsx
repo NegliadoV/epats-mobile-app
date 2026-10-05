@@ -6,6 +6,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Sparkline } from '@/components/Sparkline';
 import { Card, Chip, GradientButton, Screen, SectionTitle, T, tap } from '@/components/ui';
 import BrandLogo from '@/components/BrandLogo';
+import TropicalHeroScene from '@/components/TropicalHeroScene';
 import TropicIcon from '@/components/TropicIcon';
 import { iconForCategory } from '@/lib/tropicIconMap';
 import { ARTICLES } from '@shared/data/articles';
@@ -68,6 +69,12 @@ export default function Home() {
         <T v="label" style={{ color: c.coral }}>Вьетнам для своих · 2026</T>
         <T v="h1">Курсы, погода и всё для жизни во Вьетнаме</T>
       </View>
+
+      {/* Тропическая ретро-иллюстрация */}
+      <TropicalHeroScene
+        cityId={city}
+        waterTemp={w?.waterTemp ?? (w?.temp ? Math.round(w.temp) : 30)}
+      />
 
       {/* Курсы */}
       <Card accent>
