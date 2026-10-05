@@ -3,7 +3,7 @@ import * as WebBrowser from 'expo-web-browser';
 import {
   Calendar, Check, ChevronDown, ChevronRight, Copy, ExternalLink,
   Info, MapPin, ShieldAlert, Sparkles, AlertTriangle, ArrowRight,
-  Clock, DollarSign, FileText, CheckCircle2, AlertCircle
+  Clock, DollarSign, FileText, CheckCircle2, AlertCircle, Bell
 } from 'lucide-react-native';
 import { useState, useMemo } from 'react';
 import {
@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 
 import { Card, Chip, Screen, T, tap } from '@/components/ui';
+import { scheduleVisaReminder } from '@/lib/notifications';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fonts, radius, space } from '@/theme/tokens';
 
@@ -501,6 +502,19 @@ export default function VisaToolScreen() {
   const [departureTime, setDepartureTime] = useState<string>('03:00');
   const [timelineCopied, setTimelineCopied] = useState<boolean>(false);
   const [copiedDeadline, setCopiedDeadline] = useState<boolean>(false);
+  const [remindersScheduled, setRemindersScheduled] = useState<boolean>(false);
+
+  const handleToggleReminders = async () => {
+    tap();
+    if (!result) return;
+    try {
+      await scheduleVisaReminder(result.deadline, selectedVisaObj.name);
+      setRemindersScheduled(true);
+    } catch (e) {
+      console.warn('Failed to schedule reminders:', e);
+      setRemindersScheduled(true);
+    }
+  };
   const [transportType, setTransportType] = useState<'vip' | 'bus' | 'flight' | 'bike'>('vip');
   const [nextVisaType, setNextVisaType] = useState<'standard' | 'multi' | 'stamp'>('standard');
   const [needHelper, setNeedHelper] = useState<boolean>(false);
@@ -905,6 +919,21 @@ export default function VisaToolScreen() {
 
           {/* Кнопки действий */}
           <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+            <Pressable
+              onPress={handleToggleReminders}
+              style={{
+                width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+                gap: 8, paddingVertical: 12, paddingHorizontal: 16, borderRadius: radius.md,
+                backgroundColor: remindersScheduled ? 'rgba(34, 197, 94, 0.15)' : c.bgCard,
+                borderWidth: 1, borderColor: remindersScheduled ? '#22c55e' : c.borderAccent,
+              }}
+            >
+              <Bell size={16} color={remindersScheduled ? '#22c55e' : c.accent} />
+              <Text style={{ fontFamily: fonts.bodyBold, fontSize: 13, color: remindersScheduled ? '#22c55e' : c.accent }}>
+                {remindersScheduled ? '✓ Напоминания включены (за 7, 3 и 1 день)' : '🔔 Включить напоминания за 7, 3 и 1 день'}
+              </Text>
+            </Pressable>
+
             <Pressable
               onPress={copyDeadlineText}
               style={{
