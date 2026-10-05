@@ -75,6 +75,7 @@ interface AuthCtx {
   toggleFavorite: (slug: string) => Promise<boolean>;
   loginState: LoginState;
   login: () => Promise<void>;
+  loginDemo: () => Promise<void>;
   cancelLogin: () => void;
   logout: () => Promise<void>;
   reload: () => Promise<void>;
@@ -194,6 +195,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [poll, stopPolling]);
 
+  const loginDemo = useCallback(async () => {
+    const demoUser: PublicUser = {
+      id: 777777,
+      first_name: 'Станислав',
+      last_name: null,
+      username: 'stanis',
+      has_photo: false,
+    };
+    const demoSettings: UserSettings = {
+      ...DEFAULT_SETTINGS,
+      city: 'danang',
+      entry_date: '2026-09-01',
+      visa_type: 'evisa90_single',
+      notify_visa: true,
+    };
+    await AsyncStorage.setItem('epats_demo_user', JSON.stringify({ user: demoUser, settings: demoSettings }));
+    setMe({ user: demoUser, settings: demoSettings, favorites: [], configured: true });
+    setSettings(demoSettings);
+  }, []);
+
   const cancelLogin = useCallback(() => {
     stopPolling();
     loginToken.current = null;
@@ -201,6 +222,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [stopPolling]);
 
   const logout = useCallback(async () => {
+    await AsyncStorage.removeItem('epats_demo_user');
     await saveToken(null);
     setMe(m => (m ? { ...m, user: null, favorites: [] } : m));
   }, []);
@@ -269,6 +291,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       toggleFavorite,
       loginState,
       login,
+      loginDemo,
       cancelLogin,
       logout,
       reload,

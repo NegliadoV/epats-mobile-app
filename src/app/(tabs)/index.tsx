@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { Bell, CheckCircle2, Moon, Send, Sun, WifiOff, ShieldCheck, Sparkles } from 'lucide-react-native';
-import { useState, useEffect } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { useState, useEffect, useMemo } from 'react';
+import { Pressable, ScrollView, Text, View, TextInput } from 'react-native';
 
 import { Sparkline } from '@/components/Sparkline';
 import { Card, Chip, GradientButton, Screen, SectionTitle, T, tap } from '@/components/ui';
@@ -16,7 +16,7 @@ import { nf, timeAgo } from '@/lib/format';
 import { openTool, TOOLS } from '@/lib/tools';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fonts, radius, space } from '@/theme/tokens';
-import { formatWeatherDay, toDisplayDate } from '@/lib/dateUtils';
+import { formatWeatherDay, toDisplayDate, parseDateInput } from '@/lib/dateUtils';
 
 const CITY_ORDER = ['danang', 'nhatrang', 'hcm', 'hanoi', 'phuquoc'];
 const CITY_NAMES: Record<string, string> = {
@@ -28,7 +28,7 @@ export default function Home() {
   const rates = useRates();
   const history = useHistory();
   const weather = useWeather();
-  const { user, settings, login, loginState, cancelLogin } = useAuth();
+  const { user, settings, login, loginDemo, loginState, cancelLogin } = useAuth();
   const [city, setCity] = useState<string>(settings.city || 'danang');
   useEffect(() => { if (settings.city) setCity(settings.city); }, [settings.city]);
 
@@ -41,6 +41,66 @@ export default function Home() {
     { key: 'usdVnd', label: 'USD/VND', value: `${nf(r.usdVnd)} ₫` },
     { key: 'usdtVnd', label: 'USDT/VND', value: `${nf(usdtVnd)} ₫` },
   ] as const;
+
+    // ─── Состояния для 4 ключевых инструментов авторизованного пользователя ───
+  const [mobileConvMode, setMobileConvMode] = useState<'vnd_rub' | 'rub_vnd' | 'usd_vnd'>('vnd_rub');
+  const [mobileConvAmt, setMobileConvAmt] = useState<string>('100000');
+
+  const mobileConvResult = useMemo(() => {
+    const val = parseFloat(mobileConvAmt.replace(/\s+/g, '')) || 0;
+    const usdVnd = r.usdVnd || 25940;
+    const vnd1000Rub = r.vnd1000Rub || 3.22;
+    const rubToVnd = 1000 / vnd1000Rub;
+
+    if (mobileConvMode === 'vnd_rub') {
+      const inRub = (val / 1000) * vnd1000Rub;
+      const inUsd = val / usdVnd;
+      return {
+        primary: `${Math.round(inRub).toLocaleString('ru-RU')} ₽`,
+        secondary: `≈ ${inUsd.toFixed(2)}`,
+        rateDesc: `1 000 ₫ = ${vnd1000Rub.toFixed(2)} ₽`,
+      };
+    } else if (mobileConvMode === 'rub_vnd') {
+      const inVnd = Math.round(val * rubToVnd);
+      const inUsd = val / (r.usdRub || 83.5);
+      return {
+        primary: `${nf(inVnd)} ₫`,
+        secondary: `≈ ${inUsd.toFixed(2)}`,
+        rateDesc: `1 ₽ ≈ ${Math.round(rubToVnd)} ₫`,
+      };
+    } else {
+      const inVnd = Math.round(val * usdVnd);
+      const inRub = val * (r.usdRub || 83.5);
+      return {
+        primary: `${nf(inVnd)} ₫`,
+        secondary: `≈ ${Math.round(inRub).toLocaleString('ru-RU')} ₽`,
+        rateDesc: `$1 = ${nf(usdVnd)} ₫`,
+      };
+    }
+  }, [mobileConvMode, mobileConvAmt, r]);
+
+  const visaData = useMemo(() => {
+    if (!settings.entry_date) return null;
+    const entry = parseDateInput(settings.entry_date);
+    if (!entry || isNaN(entry.getTime())) return null;
+    const totalDays = settings.visa_type === '45' ? 45 : settings.visa_type === 'phuquoc30' ? 30 : 90;
+    const deadline = new Date(entry);
+    deadline.setDate(deadline.getDate() + (totalDays - 1));
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const daysLeft = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    const daysSpent = Math.max(0, totalDays - daysLeft);
+    const pct = Math.min(100, Math.max(0, Math.round((daysSpent / totalDays) * 100)));
+    return {
+      totalDays,
+      daysLeft,
+      pct,
+      deadlineStr: toDisplayDate(deadline),
+      entryStr: toDisplayDate(entry),
+      statusColor: daysLeft < 0 ? '#ef4444' : daysLeft <= 7 ? '#ef4444' : daysLeft <= 14 ? '#f59e0b' : '#10b981',
+      statusText: daysLeft < 0 ? 'Оверстей!' : daysLeft <= 7 ? 'Срочно на визаран!' : daysLeft <= 14 ? 'Пора готовить выезд' : 'Зелёная зона · Всё спокойно',
+    };
+  }, [settings.entry_date, settings.visa_type]);
 
   const w = weather.data?.cities?.[city];
   const featured = ARTICLES.filter(a => a.featured).slice(0, 4);
@@ -247,37 +307,222 @@ export default function Home() {
               <Text style={{ fontFamily: fonts.body, fontSize: 11, color: c.textMuted, textAlign: 'center' }}>
                 Без паролей и почты · Номер телефона остаётся скрытым
               </Text>
+              <Pressable onPress={() => { tap(); loginDemo(); }} hitSlop={10} style={{ paddingVertical: 4 }}>
+                <Text style={{ fontFamily: fonts.bodyBold, fontSize: 11.5, color: c.accent, textAlign: 'center' }}>
+                  ⚡ Войти в демо-профиль для теста (без Telegram) →
+                </Text>
+              </Pressable>
             </View>
           )}
         </Card>
       ) : (
-        <Card style={{ gap: space.sm, borderColor: 'rgba(31,209,193,0.3)', backgroundColor: 'rgba(31,209,193,0.06)' }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: 'rgba(31,209,193,0.2)', alignItems: 'center', justifyContent: 'center' }}>
-                <Bell size={18} color={c.accent} />
-              </View>
-              <View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <Text style={{ fontFamily: fonts.bodyHeavy, fontSize: 14, color: c.textPrimary }}>
-                    Уведомления Telegram активны
+        <>
+          {/* ─── СЧЁТЧИК ВИЗЫ (Для авторизованных) ─── */}
+          <Card accent style={{ gap: space.sm, borderColor: visaData ? (visaData.statusColor + '60') : c.border }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <TropicIcon name="visa" size={28} />
+                <View>
+                  <Text style={{ fontFamily: fonts.bodyHeavy, fontSize: 15, color: c.textPrimary }}>
+                    Счётчик дней визы
                   </Text>
-                  <CheckCircle2 size={14} color={c.accent} />
+                  <Text style={{ fontFamily: fonts.body, fontSize: 11, color: c.textMuted }}>
+                    {visaData ? `Въезд ${visaData.entryStr} · ${visaData.totalDays} дней` : 'Контроль срока пребывания'}
+                  </Text>
                 </View>
-                <Text style={{ fontFamily: fonts.body, fontSize: 11, color: c.textMuted }}>
-                  @epatsiobot подключен · профиль {user.first_name}
+              </View>
+              {visaData && (
+                <View style={{
+                  paddingVertical: 3,
+                  paddingHorizontal: 8,
+                  borderRadius: radius.pill,
+                  backgroundColor: visaData.statusColor + '20',
+                  borderWidth: 1,
+                  borderColor: visaData.statusColor + '50',
+                }}>
+                  <Text style={{ fontFamily: fonts.bodyBold, fontSize: 11, color: visaData.statusColor }}>
+                    {visaData.statusText}
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            {visaData ? (
+              <View style={{ gap: 8, marginTop: 4 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6 }}>
+                  <Text style={{ fontFamily: fonts.display, fontSize: 36, color: visaData.statusColor }}>
+                    {visaData.daysLeft >= 0 ? visaData.daysLeft : 0}
+                  </Text>
+                  <Text style={{ fontFamily: fonts.bodyHeavy, fontSize: 14, color: c.textSecondary }}>
+                    {visaData.daysLeft >= 0 ? 'дней осталось' : 'дней оверстея!'}
+                  </Text>
+                </View>
+
+                <Text style={{ fontFamily: fonts.body, fontSize: 13, color: c.textSecondary }}>
+                  Выезд строго до <Text style={{ fontFamily: fonts.bodyHeavy, color: c.textPrimary }}>{visaData.deadlineStr}</Text>
+                </Text>
+
+                {/* Progress bar */}
+                <View style={{ width: '100%', height: 6, borderRadius: 3, backgroundColor: c.bgSecondary, overflow: 'hidden' }}>
+                  <View style={{ width: `${visaData.pct}%`, height: '100%', backgroundColor: visaData.statusColor, borderRadius: 3 }} />
+                </View>
+              </View>
+            ) : (
+              <View style={{ gap: 8, marginTop: 4 }}>
+                <Text style={{ fontFamily: fonts.body, fontSize: 12.5, color: c.textSecondary, lineHeight: 17 }}>
+                  Укажи дату въезда во Вьетнам, чтобы видеть оставшиеся дни и получать пуш-напоминания:
+                </Text>
+                <Pressable
+                  onPress={() => { tap(); router.push('/(tabs)/me'); }}
+                  style={{
+                    paddingVertical: 8,
+                    paddingHorizontal: 12,
+                    borderRadius: radius.md,
+                    backgroundColor: c.accentGlow,
+                    borderWidth: 1,
+                    borderColor: c.accent,
+                    alignItems: 'center',
+                  }}
+                >
+                  <Text style={{ fontFamily: fonts.bodyBold, fontSize: 12.5, color: c.accent }}>
+                    Указать дату въезда в профиле →
+                  </Text>
+                </Pressable>
+              </View>
+            )}
+
+            <Pressable onPress={() => { tap(); openTool('/tools/visa'); }} style={{ marginTop: 4 }}>
+              <Text style={{ fontFamily: fonts.bodyBold, color: c.coral, fontSize: 13 }}>
+                Маршруты визарана и правила →
+              </Text>
+            </Pressable>
+          </Card>
+
+          {/* ─── БЫСТРЫЙ КОНВЕРТЕР (Для авторизованных) ─── */}
+          <Card style={{ gap: space.sm }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <TropicIcon name="converter" size={28} />
+                <View>
+                  <Text style={{ fontFamily: fonts.bodyHeavy, fontSize: 15, color: c.textPrimary }}>
+                    Быстрый конвертер
+                  </Text>
+                  <Text style={{ fontFamily: fonts.body, fontSize: 11, color: c.textMuted }}>
+                    {mobileConvResult.rateDesc}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Mode pills */}
+              <View style={{ flexDirection: 'row', gap: 4, backgroundColor: c.bgSecondary, padding: 3, borderRadius: radius.pill }}>
+                {(['vnd_rub', 'rub_vnd', 'usd_vnd'] as const).map(mode => (
+                  <Pressable
+                    key={mode}
+                    onPress={() => {
+                      tap();
+                      setMobileConvMode(mode);
+                      if (mode === 'vnd_rub') setMobileConvAmt('100000');
+                      else if (mode === 'rub_vnd') setMobileConvAmt('5000');
+                      else setMobileConvAmt('100');
+                    }}
+                    style={{
+                      paddingVertical: 3,
+                      paddingHorizontal: 7,
+                      borderRadius: radius.pill,
+                      backgroundColor: mobileConvMode === mode ? c.orchid : 'transparent',
+                    }}
+                  >
+                    <Text style={{
+                      fontFamily: fonts.bodyBold,
+                      fontSize: 10.5,
+                      color: mobileConvMode === mode ? '#fff' : c.textMuted,
+                    }}>
+                      {mode === 'vnd_rub' ? '₫→₽' : mode === 'rub_vnd' ? '₽→₫' : '$→₫'}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+
+            {/* Input and result */}
+            <View style={{ gap: 8, marginTop: 4 }}>
+              <View style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                backgroundColor: c.bgSecondary,
+                borderRadius: radius.md,
+                paddingHorizontal: 12,
+                borderWidth: 1,
+                borderColor: c.border,
+              }}>
+                <TextInput
+                  value={mobileConvAmt}
+                  onChangeText={t => setMobileConvAmt(t.replace(/[^0-9]/g, ''))}
+                  keyboardType="numeric"
+                  placeholder="Сумма..."
+                  placeholderTextColor={c.textMuted}
+                  style={{
+                    flex: 1,
+                    fontFamily: fonts.bodyBold,
+                    fontSize: 16,
+                    color: c.textPrimary,
+                    paddingVertical: 8,
+                  }}
+                />
+                <Text style={{ fontFamily: fonts.bodyHeavy, fontSize: 13, color: c.textMuted }}>
+                  {mobileConvMode === 'vnd_rub' ? 'VND' : mobileConvMode === 'rub_vnd' ? 'RUB' : 'USD'}
+                </Text>
+              </View>
+
+              {/* Preset chips */}
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }}>
+                {mobileConvMode === 'vnd_rub'
+                  ? ['50000', '100000', '500000', '1000000'].map(amt => (
+                      <Chip
+                        key={amt}
+                        label={amt === '50000' ? '50к ₫' : amt === '100000' ? '100к ₫' : amt === '500000' ? '500к ₫' : '1 млн ₫'}
+                        active={mobileConvAmt === amt}
+                        onPress={() => setMobileConvAmt(amt)}
+                      />
+                    ))
+                  : mobileConvMode === 'rub_vnd'
+                  ? ['1000', '3000', '5000', '10000'].map(amt => (
+                      <Chip key={amt} label={`${amt} ₽`} active={mobileConvAmt === amt} onPress={() => setMobileConvAmt(amt)} />
+                    ))
+                  : ['50', '100', '300', '1000'].map(amt => (
+                      <Chip key={amt} label={`${amt}`} active={mobileConvAmt === amt} onPress={() => setMobileConvAmt(amt)} />
+                    ))}
+              </ScrollView>
+
+              {/* Output result */}
+              <View style={{
+                flexDirection: 'row',
+                alignItems: 'baseline',
+                justifyContent: 'space-between',
+                padding: 10,
+                borderRadius: radius.md,
+                backgroundColor: c.bgSecondary,
+                marginTop: 2,
+              }}>
+                <View>
+                  <Text style={{ fontFamily: fonts.body, fontSize: 11, color: c.textMuted }}>Результат:</Text>
+                  <Text style={{ fontFamily: fonts.display, fontSize: 22, color: c.orchid }}>
+                    {mobileConvResult.primary}
+                  </Text>
+                </View>
+                <Text style={{ fontFamily: fonts.bodyBold, fontSize: 13, color: c.textSecondary }}>
+                  {mobileConvResult.secondary}
                 </Text>
               </View>
             </View>
-            <Pressable onPress={() => router.push('/(tabs)/me')} hitSlop={8}>
-              <Text style={{ fontFamily: fonts.bodyBold, fontSize: 12, color: c.accent }}>Настроить →</Text>
-            </Pressable>
-          </View>
 
-          <Text style={{ fontFamily: fonts.body, fontSize: 12, color: c.textSecondary, lineHeight: 16 }}>
-            🔔 Бот отслеживает дедлайн визы ({settings.entry_date ? `въезд ${toDisplayDate(settings.entry_date)}` : 'укажи дату въезда в профиле'}) и штормовые алерты по городу {CITY_NAMES[city] || city}.
-          </Text>
-        </Card>
+            <Pressable onPress={() => { tap(); openTool('/tools/converter'); }} style={{ marginTop: 4 }}>
+              <Text style={{ fontFamily: fonts.bodyBold, color: c.orchid, fontSize: 13 }}>
+                Полный калькулятор цен →
+              </Text>
+            </Pressable>
+          </Card>
+        </>
       )}
 
       {/* Погода */}
