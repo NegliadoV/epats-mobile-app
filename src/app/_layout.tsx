@@ -23,17 +23,17 @@ function RootStack() {
 
   useEffect(() => {
     if (loading) return;
-    // Если пользователь уже авторизован и его критерии есть в БД — онбординг не показываем!
-    if (user && settings?.city) {
+    // Если пользователь уже авторизован — онбординг не показываем!
+    if (user) {
       AsyncStorage.setItem('epats_onboarding_completed_v1', 'true').catch(() => {});
       return;
     }
     AsyncStorage.getItem('epats_onboarding_completed_v1').then(completed => {
-      if (!completed && !(user && settings?.city)) {
+      if (!completed && !user) {
         router.replace('/onboarding');
       }
     }).catch(() => {});
-  }, [user, settings?.city, loading]);
+  }, [user, loading]);
     return (
     <>
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />

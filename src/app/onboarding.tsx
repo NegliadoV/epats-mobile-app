@@ -73,10 +73,11 @@ export default function OnboardingScreen() {
   const [selectedFamily, setSelectedFamily] = useState<FamilyId>((settings.family as FamilyId) || 'solo');
   const [fromCurrency, setFromCurrency] = useState<CurrencyId>((settings.currency as CurrencyId) || 'RUB');
 
-  // Автоматический переход к шагу города, если пользователь вошел на шаге 1
+  // Если пользователь уже авторизован — сразу перенаправляем в приложение!
   useEffect(() => {
-    if (user && steps[stepIdx] === 'auth') {
-      setStepIdx(0); // первый шаг теперь 'city'
+    if (user) {
+      AsyncStorage.setItem(ONBOARDING_KEY, 'true').catch(() => {});
+      router.replace('/(tabs)');
     }
   }, [user]);
 
