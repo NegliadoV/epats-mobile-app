@@ -9,7 +9,7 @@ import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, Text, TextInp
 
 import { Card, Chip, GradientButton, Screen, T, tap } from '@/components/ui';
 import BrandLogo from '@/components/BrandLogo';
-import { WEB_BASE } from '@/lib/api';
+import { api, WEB_BASE } from '@/lib/api';
 import { useAuth, CityId, VisaTypeId, CurrencyId, LifestyleId, FamilyId } from '@/lib/auth';
 import { getArticleBySlug } from '@/data/articles';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -487,11 +487,59 @@ export default function MeScreen() {
   
       <SupportCard />
 
+      {/* Политика конфиденциальности (требование Google Play и App Store) */}
+      <Pressable
+        onPress={() => WebBrowser.openBrowserAsync(`${WEB_BASE}/privacy`)}
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 6,
+          paddingVertical: 10,
+        }}
+      >
+        <ShieldCheck size={14} color={c.textMuted} />
+        <Text style={{ fontFamily: fonts.bodySemi, color: c.textMuted, fontSize: 12 }}>
+          Политика конфиденциальности epats.wiki ↗
+        </Text>
+      </Pressable>
+
       {user && (
-        <Pressable onPress={logout} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'center', padding: space.md }}>
-          <LogOut size={16} color={c.textMuted} />
-          <Text style={{ fontFamily: fonts.bodyBold, color: c.textMuted }}>Выйти из аккаунта</Text>
-        </Pressable>
+        <View style={{ gap: 4, alignItems: 'center', marginTop: 4, marginBottom: space.lg }}>
+          <Pressable onPress={logout} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, padding: space.sm }}>
+            <LogOut size={16} color={c.textMuted} />
+            <Text style={{ fontFamily: fonts.bodyBold, color: c.textMuted, fontSize: 13 }}>Выйти из аккаунта</Text>
+          </Pressable>
+
+          {/* Удаление аккаунта по требованию Google Play Data Safety */}
+          <Pressable
+            onPress={() => {
+              Alert.alert(
+                'Удаление аккаунта',
+                'Все ваши данные (город, визовые даты, сохраненные статьи и профиль) будут безвозвратно удалены из базы данных.',
+                [
+                  { text: 'Отмена', style: 'cancel' },
+                  {
+                    text: 'Удалить аккаунт',
+                    style: 'destructive',
+                    onPress: async () => {
+                      try {
+                        await api('/api/me', { method: 'DELETE' });
+                      } catch {}
+                      await logout();
+                      Alert.alert('Готово', 'Ваш аккаунт и данные успешно удалены.');
+                    },
+                  },
+                ]
+              );
+            }}
+            style={{ padding: space.xs }}
+          >
+            <Text style={{ fontFamily: fonts.bodySemi, color: c.danger, fontSize: 11 }}>
+              Удалить аккаунт и все данные
+            </Text>
+          </Pressable>
+        </View>
       )}
     </Screen>
   );
