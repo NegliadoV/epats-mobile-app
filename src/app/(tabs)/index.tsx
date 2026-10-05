@@ -1,10 +1,10 @@
 import { router } from 'expo-router';
-import { Moon, Sun, WifiOff } from 'lucide-react-native';
+import { Bell, CheckCircle2, Moon, Send, Sun, WifiOff, ShieldCheck, Sparkles } from 'lucide-react-native';
 import { useState, useEffect } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { Sparkline } from '@/components/Sparkline';
-import { Card, Chip, Screen, SectionTitle, T, tap } from '@/components/ui';
+import { Card, Chip, GradientButton, Screen, SectionTitle, T, tap } from '@/components/ui';
 import BrandLogo from '@/components/BrandLogo';
 import { ARTICLES } from '@shared/data/articles';
 import { useAuth } from '@/lib/auth';
@@ -24,7 +24,7 @@ export default function Home() {
   const rates = useRates();
   const history = useHistory();
   const weather = useWeather();
-  const { settings } = useAuth();
+  const { user, settings, login, loginState, cancelLogin } = useAuth();
   const [city, setCity] = useState<string>(settings.city || 'danang');
   useEffect(() => { if (settings.city) setCity(settings.city); }, [settings.city]);
 
@@ -99,6 +99,137 @@ export default function Home() {
           <Text style={{ fontFamily: fonts.bodyBold, color: c.coral, fontSize: 14 }}>Открыть конвертер →</Text>
         </Pressable>
       </Card>
+
+      
+      {/* ─── ПРЕИМУЩЕСТВА TELEGRAM И УВЕДОМЛЕНИЯ ─── */}
+      {!user ? (
+        <Card accent style={{ gap: space.md, borderWidth: 1.5, borderColor: 'rgba(42,171,238,0.4)', backgroundColor: 'rgba(42,171,238,0.06)' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(42,171,238,0.2)', alignItems: 'center', justifyContent: 'center' }}>
+                <Send size={20} color={c.tg} />
+              </View>
+              <View>
+                <T v="label" style={{ color: c.tg, letterSpacing: 0.5 }}>Вход через Telegram</T>
+                <Text style={{ fontFamily: fonts.bodyHeavy, fontSize: 16, color: c.textPrimary }}>
+                  Зачем подключать Telegram?
+                </Text>
+              </View>
+            </View>
+            <View style={{ paddingVertical: 4, paddingHorizontal: 10, borderRadius: radius.pill, backgroundColor: 'rgba(42,171,238,0.18)' }}>
+              <Text style={{ fontFamily: fonts.bodyBold, fontSize: 11, color: c.tg }}>5 секунд</Text>
+            </View>
+          </View>
+
+          <T v="body" style={{ color: c.textSecondary, fontSize: 13, lineHeight: 18 }}>
+            Подключи бота <Text style={{ fontFamily: fonts.bodyHeavy, color: c.tg }}>@epatsiobot</Text> в один клик. Приложение синхронизирует профиль, а бот будет присылать критически важные уведомления:
+          </T>
+
+          <View style={{ gap: 10 }}>
+            <View style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start' }}>
+              <Text style={{ fontSize: 20 }}>🛂</Text>
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text style={{ fontFamily: fonts.bodyHeavy, fontSize: 13.5, color: c.textPrimary }}>
+                  Уведомления о дедлайне визы
+                </Text>
+                <Text style={{ fontFamily: fonts.body, fontSize: 12, color: c.textMuted, lineHeight: 16 }}>
+                  Напоминания в чат за 10, 5 и 3 дня до визарана. Без риска просрочки и штрафов ($50–$200+ на границе).
+                </Text>
+              </View>
+            </View>
+
+            <View style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start' }}>
+              <Text style={{ fontSize: 20 }}>🌪️</Text>
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text style={{ fontFamily: fonts.bodyHeavy, fontSize: 13.5, color: c.textPrimary }}>
+                  Экстренные штормовые алерты
+                </Text>
+                <Text style={{ fontFamily: fonts.body, fontSize: 12, color: c.textMuted, lineHeight: 16 }}>
+                  Мгновенные предупреждения при приближении тайфуна, наводнения или шторма к твоему городу.
+                </Text>
+              </View>
+            </View>
+
+            <View style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start' }}>
+              <Text style={{ fontSize: 20 }}>☁️</Text>
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text style={{ fontFamily: fonts.bodyHeavy, fontSize: 13.5, color: c.textPrimary }}>
+                  Сквозная синхронизация без паролей
+                </Text>
+                <Text style={{ fontFamily: fonts.body, fontSize: 12, color: c.textMuted, lineHeight: 16 }}>
+                  Твой город, валюта, состав семьи и бюджет сохранены в Supabase и синхронизированы с мобилкой и сайтом.
+                </Text>
+              </View>
+            </View>
+
+            <View style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start' }}>
+              <Text style={{ fontSize: 20 }}>⭐</Text>
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text style={{ fontFamily: fonts.bodyHeavy, fontSize: 13.5, color: c.textPrimary }}>
+                  Избранные статьи и чеклисты
+                </Text>
+                <Text style={{ fontFamily: fonts.body, fontSize: 12, color: c.textMuted, lineHeight: 16 }}>
+                  Сохраняй статьи, чеклист переезда и контакты чатов — всё доступно с любого устройства.
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          {loginState === 'waiting' ? (
+            <View style={{ padding: 12, borderRadius: radius.md, backgroundColor: 'rgba(42,171,238,0.12)', alignItems: 'center', gap: 6 }}>
+              <Text style={{ fontFamily: fonts.bodyHeavy, color: c.tg, fontSize: 13 }}>
+                ⏳ Подтвердите вход в Telegram
+              </Text>
+              <Text style={{ fontFamily: fonts.body, color: c.textSecondary, fontSize: 11, textAlign: 'center' }}>
+                Нажмите «Start» или «Войти» в диалоге с @epatsiobot
+              </Text>
+              <Pressable onPress={cancelLogin} hitSlop={8}>
+                <Text style={{ fontFamily: fonts.bodyBold, color: c.textMuted, fontSize: 12, marginTop: 4 }}>Отмена</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <View style={{ gap: 6 }}>
+              <GradientButton
+                kind="tg"
+                title="Войти через Telegram"
+                icon={<Send size={18} color="#fff" />}
+                onPress={login}
+              />
+              <Text style={{ fontFamily: fonts.body, fontSize: 11, color: c.textMuted, textAlign: 'center' }}>
+                Без паролей и почты · Номер телефона остаётся скрытым
+              </Text>
+            </View>
+          )}
+        </Card>
+      ) : (
+        <Card style={{ gap: space.sm, borderColor: 'rgba(31,209,193,0.3)', backgroundColor: 'rgba(31,209,193,0.06)' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: 'rgba(31,209,193,0.2)', alignItems: 'center', justifyContent: 'center' }}>
+                <Bell size={18} color={c.accent} />
+              </View>
+              <View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Text style={{ fontFamily: fonts.bodyHeavy, fontSize: 14, color: c.textPrimary }}>
+                    Уведомления Telegram активны
+                  </Text>
+                  <CheckCircle2 size={14} color={c.accent} />
+                </View>
+                <Text style={{ fontFamily: fonts.body, fontSize: 11, color: c.textMuted }}>
+                  @epatsiobot подключен · профиль {user.first_name}
+                </Text>
+              </View>
+            </View>
+            <Pressable onPress={() => router.push('/(tabs)/me')} hitSlop={8}>
+              <Text style={{ fontFamily: fonts.bodyBold, fontSize: 12, color: c.accent }}>Настроить →</Text>
+            </Pressable>
+          </View>
+
+          <Text style={{ fontFamily: fonts.body, fontSize: 12, color: c.textSecondary, lineHeight: 16 }}>
+            🔔 Бот отслеживает дедлайн визы ({settings.entry_date ? `въезд ${settings.entry_date}` : 'укажи дату въезда в профиле'}) и штормовые алерты по городу {CITY_NAMES[city] || city}.
+          </Text>
+        </Card>
+      )}
 
       {/* Погода */}
       <SectionTitle title="Погода" action="Радар" onAction={() => openTool('/tools/weather')} />

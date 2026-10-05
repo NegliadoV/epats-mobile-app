@@ -93,7 +93,7 @@ export default function HomeWebScreen() {
   const rates = useRates();
   const history = useHistory();
   const weather = useWeather();
-  const { settings } = useAuth();
+  const { user, settings, login, loginState, cancelLogin } = useAuth();
   const [selectedCity, setSelectedCity] = useState<string>(settings?.city || 'danang');
 
   React.useEffect(() => {
@@ -578,6 +578,223 @@ export default function HomeWebScreen() {
               Смотреть радар тайфунов и прогноз на 7 дней →
             </button>
           </div>
+        </section>
+
+        
+        {/* ═══ TELEGRAM BENEFITS & NOTIFICATIONS PROMO ═══ */}
+        <section style={{ marginBottom: 56 }}>
+          {!user ? (
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(18, 16, 38, 0.9) 0%, rgba(20, 24, 48, 0.85) 100%)',
+              border: '1px solid rgba(42, 171, 238, 0.4)',
+              borderRadius: 28,
+              padding: '36px 32px',
+              position: 'relative',
+              overflow: 'hidden',
+              boxShadow: '0 20px 50px -15px rgba(42, 171, 238, 0.25)',
+              backdropFilter: 'blur(20px)',
+            }}>
+              {/* Background ambient glow */}
+              <div style={{
+                position: 'absolute', top: -80, right: -80, width: 260, height: 260,
+                borderRadius: '50%', background: 'radial-gradient(circle, rgba(42, 171, 238, 0.2) 0%, transparent 70%)',
+                pointerEvents: 'none',
+              }} />
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 24, marginBottom: 28 }}>
+                <div style={{ maxWidth: 620 }}>
+                  <div style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 8,
+                    background: 'rgba(42, 171, 238, 0.15)', border: '1px solid rgba(42, 171, 238, 0.35)',
+                    borderRadius: 999, padding: '5px 14px', marginBottom: 14,
+                    fontSize: 12, color: '#2aabee', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em',
+                  }}>
+                    <span>✈️</span> Вход через Telegram · Зачем подключать бота?
+                  </div>
+                  <h2 style={{ fontSize: 'clamp(1.5rem, 2.5vw, 2.1rem)', fontWeight: 900, color: '#fff', margin: '0 0 10px 0', lineHeight: 1.25 }}>
+                    Умные уведомления в Telegram <span style={{ color: '#2aabee' }}>@epatsiobot</span>
+                  </h2>
+                  <p style={{ fontSize: 15, color: '#94a3b8', margin: 0, lineHeight: 1.6 }}>
+                    Подключи бота в 1 клик без паролей и почты. epats.io сохранит твои настройки в облачной БД, а бот вовремя пришлёт важные напоминания прямо в личку.
+                  </p>
+                </div>
+
+                {/* Login button */}
+                <div style={{ minWidth: 240 }}>
+                  {loginState === 'waiting' ? (
+                    <div style={{
+                      background: 'rgba(42, 171, 238, 0.15)', border: '1px solid rgba(42, 171, 238, 0.4)',
+                      borderRadius: 18, padding: '16px 20px', textAlign: 'center',
+                    }}>
+                      <div style={{ fontSize: 14, fontWeight: 800, color: '#2aabee', marginBottom: 4 }}>
+                        ⏳ Ожидаем входа...
+                      </div>
+                      <div style={{ fontSize: 12, color: '#cbd5e1', marginBottom: 10 }}>
+                        Нажмите Start в @epatsiobot
+                      </div>
+                      <button
+                        onClick={cancelLogin}
+                        style={{
+                          background: 'none', border: 'none', color: '#94a3b8',
+                          fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                        }}
+                      >
+                        Отмена
+                      </button>
+                    </div>
+                  ) : (
+                    <div>
+                      <button
+                        onClick={login}
+                        style={{
+                          width: '100%',
+                          background: 'linear-gradient(135deg, #2aabee 0%, #229ed9 100%)',
+                          border: 'none',
+                          color: '#fff',
+                          padding: '16px 26px',
+                          borderRadius: 16,
+                          fontSize: 16,
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                          boxShadow: '0 10px 25px -5px rgba(42, 171, 238, 0.45)',
+                          transition: 'all 0.2s ease',
+                        }}
+                      >
+                        <span>✈️</span> Войти через Telegram
+                      </button>
+                      <div style={{ fontSize: 11, color: '#64748b', textAlign: 'center', marginTop: 8 }}>
+                        Вход за 5 секунд · Без паролей и спама
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* 4 Feature Cards */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
+                gap: 16,
+              }}>
+                <div style={{
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid rgba(255, 255, 255, 0.07)',
+                  borderRadius: 18,
+                  padding: '18px 16px',
+                }}>
+                  <div style={{ fontSize: 26, marginBottom: 8 }}>🛂</div>
+                  <div style={{ fontSize: 14.5, fontWeight: 800, color: '#fff', marginBottom: 4 }}>
+                    Дедлайны визы без штрафов
+                  </div>
+                  <div style={{ fontSize: 12.5, color: '#94a3b8', lineHeight: 1.5 }}>
+                    Бот пришлёт напоминание за 10, 5 и 3 дня до визарана. Не попадёшь на штраф ($50–$200+ на границе).
+                  </div>
+                </div>
+
+                <div style={{
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid rgba(255, 255, 255, 0.07)',
+                  borderRadius: 18,
+                  padding: '18px 16px',
+                }}>
+                  <div style={{ fontSize: 26, marginBottom: 8 }}>🌪️</div>
+                  <div style={{ fontSize: 14.5, fontWeight: 800, color: '#fff', marginBottom: 4 }}>
+                    Штормовые и тайфунные алерты
+                  </div>
+                  <div style={{ fontSize: 12.5, color: '#94a3b8', lineHeight: 1.5 }}>
+                    Экстренные оповещения при приближении тропического циклона, наводнения или сильных ливней к твоему городу.
+                  </div>
+                </div>
+
+                <div style={{
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid rgba(255, 255, 255, 0.07)',
+                  borderRadius: 18,
+                  padding: '18px 16px',
+                }}>
+                  <div style={{ fontSize: 26, marginBottom: 8 }}>☁️</div>
+                  <div style={{ fontSize: 14.5, fontWeight: 800, color: '#fff', marginBottom: 4 }}>
+                    Сквозная синхронизация
+                  </div>
+                  <div style={{ fontSize: 12.5, color: '#94a3b8', lineHeight: 1.5 }}>
+                    Твой город, выбранная валюта, состав семьи и бюджет сохранены в Supabase и синхронны между телефоном и сайтом.
+                  </div>
+                </div>
+
+                <div style={{
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid rgba(255, 255, 255, 0.07)',
+                  borderRadius: 18,
+                  padding: '18px 16px',
+                }}>
+                  <div style={{ fontSize: 26, marginBottom: 8 }}>⭐</div>
+                  <div style={{ fontSize: 14.5, fontWeight: 800, color: '#fff', marginBottom: 4 }}>
+                    Избранное и чеклисты
+                  </div>
+                  <div style={{ fontSize: 12.5, color: '#94a3b8', lineHeight: 1.5 }}>
+                    Сохраняй статьи, контакты проверенных риелторов и чеклисты переезда — всё остаётся под рукой.
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div style={{
+              background: 'rgba(31, 209, 193, 0.08)',
+              border: '1px solid rgba(31, 209, 193, 0.35)',
+              borderRadius: 22,
+              padding: '20px 24px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: 16,
+              backdropFilter: 'blur(16px)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div style={{
+                  width: 44, height: 44, borderRadius: '50%',
+                  background: 'rgba(31, 209, 193, 0.2)', border: '1px solid #1fd1c1',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 20,
+                }}>
+                  🔔
+                </div>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 16, fontWeight: 800, color: '#fff' }}>
+                      Уведомления Telegram подключены
+                    </span>
+                    <span style={{
+                      fontSize: 11, fontWeight: 800, color: '#1fd1c1',
+                      background: 'rgba(31, 209, 193, 0.15)', padding: '2px 8px', borderRadius: 999,
+                    }}>
+                      ✓ Активно
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 13, color: '#94a3b8', marginTop: 3 }}>
+                    Бот @epatsiobot отслеживает дату визы и тайфуны для пользователя {user.first_name}.
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => router.push('/me' as any)}
+                style={{
+                  background: 'rgba(31, 209, 193, 0.15)',
+                  border: '1px solid rgba(31, 209, 193, 0.4)',
+                  color: '#1fd1c1',
+                  padding: '10px 18px',
+                  borderRadius: 12,
+                  fontSize: 13,
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                }}
+              >
+                Настройки профиля →
+              </button>
+            </div>
+          )}
         </section>
 
         {/* ═══ TOOLS SECTION ═══ */}
