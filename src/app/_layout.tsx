@@ -5,6 +5,8 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Platform } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -17,6 +19,7 @@ SplashScreen.preventAutoHideAsync();
 
 function RootStack() {
   const { c, theme } = useTheme();
+  useCheckOnboarding();
   return (
     <>
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
@@ -30,6 +33,7 @@ function RootStack() {
           contentStyle: { backgroundColor: c.bgPrimary },
         }}
       >
+        <Stack.Screen name="onboarding" options={{ headerShown: false, presentation: "fullScreenModal" }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="article/[slug]" options={{ title: '' }} />
         <Stack.Screen name="tools/converter" options={{ title: 'Конвертер VND' }} />
@@ -44,6 +48,16 @@ function RootStack() {
       </Stack>
     </>
   );
+}
+
+function useCheckOnboarding() {
+  useEffect(() => {
+    AsyncStorage.getItem('epats_onboarding_completed_v1').then(completed => {
+      if (!completed) {
+        router.replace('/onboarding');
+      }
+    }).catch(() => {});
+  }, []);
 }
 
 export default function RootLayout() {

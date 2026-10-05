@@ -424,6 +424,20 @@ export default function MeScreen() {
         )}
       </Card>
 
+      
+      {/* Кнопка повторного прохождения опроса */}
+      <Card
+        onPress={() => router.push('/onboarding')}
+        style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, backgroundColor: 'rgba(31,209,193,0.06)', borderColor: c.accent }}
+      >
+        <Text style={{ fontSize: 24 }}>✨</Text>
+        <View style={{ flex: 1, gap: 2 }}>
+          <T v="h3" style={{ color: c.accent }}>Первичный опрос экспата</T>
+          <T v="muted" style={{ fontSize: 12 }}>Пройти опрос заново для перенастройки всех рекомендаций</T>
+        </View>
+        <ChevronRight size={18} color={c.accent} />
+      </Card>
+  
       <SupportCard />
 
       {user && (
