@@ -1,6 +1,6 @@
 import { BlurView } from 'expo-blur';
 import { Tabs } from 'expo-router';
-import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import type { ComponentProps } from 'react';
 import { BookOpen, Grid2x2, Palmtree, UserRound } from 'lucide-react-native';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,6 +8,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { tap } from '@/components/ui';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fonts } from '@/theme/tokens';
+
+// React Navigation теперь встроен в expo-router, поэтому тип берём из пропсов Tabs
+type BottomTabBarProps = Parameters<NonNullable<ComponentProps<typeof Tabs>['tabBar']>>[0];
 
 const TAB_CONFIG: Record<string, { label: string; Icon: typeof Palmtree }> = {
   index: { label: 'Главная', Icon: Palmtree },
