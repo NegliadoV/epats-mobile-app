@@ -25,12 +25,11 @@ export const INITIAL_RATES: Rates = {
 
 export const useRates = () => useCached<Rates>('/api/rates', INITIAL_RATES, 60_000);
 
-export type Cur = 'VND' | 'RUB' | 'USD' | 'USDT';
+export type Cur = 'VND' | 'RUB' | 'USD';
 export const CURRENCIES: { id: Cur; flag: string; symbol: string; name: string }[] = [
   { id: 'VND', flag: '🇻🇳', symbol: '₫', name: 'Донг' },
   { id: 'RUB', flag: '🇷🇺', symbol: '₽', name: 'Рубль' },
   { id: 'USD', flag: '🇺🇸', symbol: '$', name: 'Доллар' },
-  { id: 'USDT', flag: '🪙', symbol: '₮', name: 'Tether' },
 ];
 
 /** Сколько единиц валюты за 1 USD */
@@ -39,7 +38,6 @@ function perUsd(cur: Cur, r: Rates): number {
     case 'USD': return 1;
     case 'RUB': return r.usdRub;
     case 'VND': return r.usdVnd;
-    case 'USDT': return r.usdRub / r.usdtRub; // USDT дороже/дешевле доллара на величину рыночной премии
   }
 }
 

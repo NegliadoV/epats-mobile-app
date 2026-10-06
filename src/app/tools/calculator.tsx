@@ -78,7 +78,7 @@ export default function BudgetCalculator() {
   const handleCur = (id: Cur) => {
     tap();
     setCur(id);
-    if (id === 'RUB' || id === 'USD' || id === 'USDT') {
+    if (id === 'RUB' || id === 'USD') {
       saveSettings({ currency: id });
     }
   };

@@ -13,7 +13,7 @@ export interface ToolDef {
 }
 
 export const TOOLS: ToolDef[] = [
-  { href: '/tools/converter', name: 'Конвертер VND', emoji: '💱', icon: 'converter', desc: 'Донг, рубль, доллар, USDT + P2P-курс', native: true },
+  { href: '/tools/converter', name: 'Конвертер VND', emoji: '💱', icon: 'converter', desc: 'Донг, рубль, доллар + P2P-курс', native: true },
   { href: '/tools/calculator', name: 'Калькулятор бюджета', emoji: '🧮', icon: 'calculator', desc: 'Сколько нужно на жизнь в месяц', native: true },
   { href: '/tools/visa', name: 'Визаран', emoji: '🚌', icon: 'visa', desc: 'Сроки, маршруты и таймлайн', native: true },
   { href: '/tools/gyms', name: 'Тренажерные залы', emoji: '🏋️', icon: 'health', desc: '12 залов Дананга: кондиционеры, цены, бассейны', native: true },

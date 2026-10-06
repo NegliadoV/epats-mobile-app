@@ -9,11 +9,10 @@ const CURRENCY_META = [
   { id: 'VND', flag: '🇻🇳', name: 'Донг', symbol: '₫' },
   { id: 'RUB', flag: '🇷🇺', name: 'Рубль', symbol: '₽' },
   { id: 'USD', flag: '🇺🇸', name: 'Доллар', symbol: 'USD' },
-  { id: 'USDT', flag: '💵', name: 'USDT', symbol: 'USDT' },
 ] as const;
 
-type CurId = 'VND' | 'RUB' | 'USD' | 'USDT';
-type PairId = 'USD_RUB' | 'USDT_RUB' | 'VND1000_RUB' | 'USD_VND' | 'USDT_VND' | 'RUB_VND';
+type CurId = 'VND' | 'RUB' | 'USD';
+type PairId = 'USD_RUB' | 'VND1000_RUB' | 'USD_VND' | 'RUB_VND';
 type RateMode = 'official' | 'bybit_p2p';
 
 interface RatesPayload {
@@ -93,10 +92,10 @@ export default function ConverterWebScreen() {
   const [amount, setAmount] = useState('0');
   const { settings } = useAuth();
   const [from, setFrom] = useState<CurId>('VND');
-  const [to, setTo] = useState<CurId>((settings?.currency as CurId) || 'RUB');
+  const [to, setTo] = useState<CurId>(settings?.currency === 'USD' ? 'USD' : 'RUB');
 
   useEffect(() => {
-    if (settings?.currency) setTo(settings.currency as CurId);
+    if (settings?.currency === 'USD' || settings?.currency === 'RUB') setTo(settings.currency);
   }, [settings?.currency]);
   const [selectedPair, setSelectedPair] = useState<PairId>('USD_RUB');
 
@@ -122,13 +121,11 @@ export default function ConverterWebScreen() {
         { ...CURRENCY_META[0], perUsd: p2pUsdtVnd },
         { ...CURRENCY_META[1], perUsd: p2pUsdtRub },
         { ...CURRENCY_META[2], perUsd: 1 },
-        { ...CURRENCY_META[3], perUsd: 1 },
       ]
     : [
         { ...CURRENCY_META[0], perUsd: rates.usdVnd },
         { ...CURRENCY_META[1], perUsd: rates.usdRub },
         { ...CURRENCY_META[2], perUsd: 1 },
-        { ...CURRENCY_META[3], perUsd: 1 },
       ];
 
   const fromCur = CURRENCIES.find(c => c.id === from)!;
@@ -141,7 +138,6 @@ export default function ConverterWebScreen() {
 
   function swap() { setFrom(to); setTo(from); }
 
-  const usdtVndRate = isP2P ? p2pUsdtVnd : Math.round(rates.usdVnd * (rates.usdtRub / rates.usdRub));
   const rubVndRate = isP2P ? Math.round(p2pVndRub) : Math.round(rates.usdVnd / rates.usdRub);
 
   const ALL_PAIRS = [
@@ -157,17 +153,6 @@ export default function ConverterWebScreen() {
       chartData: history?.series?.usdRub ?? [rates.usdRub, rates.usdRub],
     },
     {
-      id: 'USDT_RUB' as PairId,
-      flag: '💵 🇷🇺',
-      label: 'USDT / RUB',
-      fullName: 'Криптодоллар USDT к рублю',
-      rateDisplay: p2pUsdtRub.toFixed(2) + ' ₽',
-      rateNum: p2pUsdtRub,
-      unit: '₽',
-      sub: isP2P ? 'Bybit P2P (карты банков РФ)' : 'Спот CoinGecko',
-      chartData: history?.series?.usdtRub ?? [p2pUsdtRub, p2pUsdtRub],
-    },
-    {
       id: 'VND1000_RUB' as PairId,
       flag: '🇻🇳 🇷🇺',
       label: '1 000₫ / RUB',
@@ -175,7 +160,7 @@ export default function ConverterWebScreen() {
       rateDisplay: (isP2P ? (1000 / p2pVndRub) : rates.vnd1000Rub).toFixed(2) + ' ₽',
       rateNum: isP2P ? (1000 / p2pVndRub) : rates.vnd1000Rub,
       unit: '₽',
-      sub: isP2P ? 'Реальный курс через P2P Bybit' : 'Официальный межбанковский кросс',
+      sub: isP2P ? 'Реальный курс через P2P' : 'Официальный межбанковский кросс',
       chartData: history?.series?.vnd1000Rub ?? [rates.vnd1000Rub, rates.vnd1000Rub],
     },
     {
@@ -188,17 +173,6 @@ export default function ConverterWebScreen() {
       unit: '₫',
       sub: 'Банковский межбанк Вьетнама',
       chartData: history?.series?.usdVnd ?? [rates.usdVnd, rates.usdVnd],
-    },
-    {
-      id: 'USDT_VND' as PairId,
-      flag: '💵 🇻🇳',
-      label: 'USDT / VND',
-      fullName: 'Криптодоллар USDT к донгу',
-      rateDisplay: usdtVndRate.toLocaleString('ru-RU') + ' ₫',
-      rateNum: usdtVndRate,
-      unit: '₫',
-      sub: 'Bybit P2P на карты Techcombank/VCB',
-      chartData: history?.series?.usdtVnd ?? [usdtVndRate, usdtVndRate],
     },
     {
       id: 'RUB_VND' as PairId,
@@ -285,7 +259,7 @@ export default function ConverterWebScreen() {
             Конвертер валют и курсы онлайн
           </h1>
           <p style={{ fontSize: 15, color: '#94a3b8', maxWidth: 580, margin: '0 auto', lineHeight: 1.6 }}>
-            VND ⇄ RUB ⇄ USD ⇄ USDT — официальные курсы ЦБ и реальный P2P спред Bybit с графиками котировок.
+            VND ⇄ RUB ⇄ USD — официальные курсы ЦБ и реальный P2P спред с графиками котировок.
           </p>
         </div>
 
@@ -436,16 +410,16 @@ export default function ConverterWebScreen() {
                 </div>
                 <span style={{ color: '#64748b' }}>➔</span>
                 <div style={{ background: 'rgba(255,255,255,0.05)', padding: '6px 12px', borderRadius: 8 }}>
-                  💵 1 USDT = <strong>{p2pUsdtRub.toFixed(2)} ₽</strong>
+                  1 000 ₫ ≈ <strong>{(1000 / p2pVndRub).toFixed(2)} ₽</strong>
                 </div>
                 <span style={{ color: '#64748b' }}>➔</span>
                 <div style={{ background: 'rgba(255,255,255,0.05)', padding: '6px 12px', borderRadius: 8 }}>
-                  🏦 Techcombank/VCB = <strong>{p2pUsdtVnd.toLocaleString('ru-RU')} ₫</strong>
+                  🏦 Techcombank/VCB (VietQR)
                 </div>
               </div>
 
               <p style={{ margin: 0, fontSize: 11, color: '#94a3b8', lineHeight: 1.6 }}>
-                💡 <strong>Совет экспату:</strong> В банковском приложении РФ при переводе мерчанту никогда не пишите слова «крипта», «usdt», «обмен». Оставляйте поле пустым или пишите «возврат долга». Выбирайте P2P-мерчантов со значком PRO и рейтингом от 99%.
+                💡 <strong>Совет экспату:</strong> При обмене рублей на донги через P2P-переводы выбирайте проверенных мерчантов со значком PRO и рейтингом от 99%.
               </p>
             </div>
           )}
