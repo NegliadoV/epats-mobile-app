@@ -33,13 +33,11 @@ export default function Home() {
   useEffect(() => { if (settings.city) setCity(settings.city); }, [settings.city]);
 
   const r = rates.data;
-  const usdtVnd = Math.round(r.usdVnd * (r.usdtRub / r.usdRub));
   const pairs = [
     { key: 'usdRub', label: 'USD/RUB', value: `${r.usdRub.toFixed(1)} ₽` },
-    { key: 'usdtRub', label: 'USDT/RUB', value: `${r.usdtRub.toFixed(1)} ₽` },
     { key: 'vnd1000Rub', label: '1000₫/RUB', value: `${r.vnd1000Rub.toFixed(2)} ₽` },
     { key: 'usdVnd', label: 'USD/VND', value: `${nf(r.usdVnd)} ₫` },
-    { key: 'usdtVnd', label: 'USDT/VND', value: `${nf(usdtVnd)} ₫` },
+    { key: 'rubVnd', label: 'RUB/VND', value: `${nf(Math.round(r.usdVnd / r.usdRub))} ₫` },
   ] as const;
 
     // ─── Состояния для 4 ключевых инструментов авторизованного пользователя ───
