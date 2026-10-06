@@ -90,7 +90,7 @@ export default function ConverterWebScreen() {
   });
   const [history, setHistory] = useState<HistoryPayload | null>(null);
   const [rateMode, setRateMode] = useState<RateMode>('official');
-  const [amount, setAmount] = useState('1000000');
+  const [amount, setAmount] = useState('0');
   const { settings } = useAuth();
   const [from, setFrom] = useState<CurId>('VND');
   const [to, setTo] = useState<CurId>((settings?.currency as CurId) || 'RUB');
@@ -357,9 +357,15 @@ export default function ConverterWebScreen() {
               </div>
               <div style={{ position: 'relative' }}>
                 <input
-                  type="text" value={amount}
-                  onChange={e => setAmount(e.target.value)}
-                  placeholder="Сумма"
+                  type="text"
+                  value={amount}
+                  onFocus={e => e.target.select()}
+                  onChange={e => {
+                    let val = e.target.value.replace(/[^0-9.,]/g, '');
+                    val = val.replace(/^0+(?=[0-9])/, '');
+                    setAmount(val);
+                  }}
+                  placeholder="0"
                   style={{
                     width: '100%', padding: '14px 50px 14px 18px', borderRadius: 14,
                     border: '1px solid rgba(31,209,193,0.3)', background: 'rgba(255,255,255,0.03)',

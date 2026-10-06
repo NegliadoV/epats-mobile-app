@@ -33,14 +33,14 @@ export default function Converter() {
   const { settings } = useAuth();
   const { data: r, updatedAt, offline } = useRates();
   const [from, setFrom] = useState<Cur>('VND');
-  const [raw, setRaw] = useState('500000');
+  const [raw, setRaw] = useState('0');
   const amount = Number(raw) || 0;
   const cur = CURRENCIES.find(x => x.id === from)!;
 
   const press = (k: string) => {
     tap();
-    if (k === '⌫') return setRaw(s => s.slice(0, -1));
-    setRaw(s => (s === '0' ? k.replace(/^0+/, '') || '0' : (s + k).slice(0, 12)));
+    if (k === '⌫') return setRaw(s => (s.length <= 1 ? '0' : s.slice(0, -1)));
+    setRaw(s => (!s || s === '0' ? (k === '000' ? '0' : k.replace(/^0+/, '') || '0') : (s + k).slice(0, 12)));
   };
 
   // Быстрая смена направления: VND ⇄ валюта пользователя (по умолчанию RUB)
@@ -89,7 +89,7 @@ export default function Converter() {
           <Pressable
             key={k}
             onPress={() => press(k)}
-            onLongPress={k === '⌫' ? () => { tap(); setRaw(''); } : undefined}
+            onLongPress={k === '⌫' ? () => { tap(); setRaw('0'); } : undefined}
             style={({ pressed }) => ({
               width: '31.5%', flexGrow: 1, height: 56, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center',
               backgroundColor: pressed ? c.bgCardHover : c.bgCard, borderWidth: 1, borderColor: c.border,
